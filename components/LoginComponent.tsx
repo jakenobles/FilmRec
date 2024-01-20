@@ -16,7 +16,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center'>
+    <div className='min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8'>
       <div className='flex flex-col justify-center items-center mb-10 relative z-10'>
         <Image
           width={600}
@@ -32,8 +32,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
           <CardBody>
             <Input className="mb-2" type="email" label="Email" placeholder="Enter your email" />
             <Input className="mb-2" type="password" label="Password" placeholder="Enter your password" />
-            <Input className="mb-2" type="password" label="Confirm Password" placeholder="Confirm your password" />
-            <Button color='primary' variant='bordered'>Login</Button>       
+            <Button onClick={handleLogin} color='primary' variant='bordered'>Login</Button>       
           </CardBody>
         </Card>
       </div>
