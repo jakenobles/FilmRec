@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Image} from "@nextui-org/image";
 import {Card, CardBody, CardHeader} from "@nextui-org/react";
-import NextImage from "next/image";
 import {Input} from "@nextui-org/react";
 import {Button} from "@nextui-org/react";
 
@@ -10,9 +9,31 @@ interface LoginComponentProps {
 }
 
 const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
-  const handleLogin = () => {
-    // Implement login logic
-    onLoginSuccess();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    const apiUrl = 'http://127.0.0.1:5000/api/login'; // Replace with your API endpoint
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Call onLoginSuccess if login is successful
+      onLoginSuccess();
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (
@@ -30,9 +51,23 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
         <Card className='w-full'>
           <CardHeader>Login / Register</CardHeader>
           <CardBody>
-            <Input className="mb-2" type="email" label="Email" placeholder="Enter your email" />
-            <Input className="mb-2" type="password" label="Password" placeholder="Enter your password" />
-            <Button onClick={handleLogin} color='primary' variant='bordered'>Login</Button>       
+            <Input
+              className="mb-2"
+              type="email"
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input
+              className="mb-2"
+              type="password"
+              label="Password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button onClick={handleLogin} color='primary' variant='bordered'>Login/Register</Button>       
           </CardBody>
         </Card>
       </div>

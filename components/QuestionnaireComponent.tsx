@@ -1,16 +1,56 @@
+import React, { useState } from 'react';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import {CheckboxGroup, Checkbox} from "@nextui-org/react";
 import {Button} from "@nextui-org/button"
-import React from 'react';
 
 interface QuestionnaireComponentProps {
   onComplete: () => void;
 }
 
 const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onComplete }) => {
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+
+  const handleCheckboxChange = (value: string[]) => {
+    setSelectedGenres(value);
+  };
+
+  const postUserSelection = async (selectedGenres) => {
+    const apiUrl = 'https://your-api-endpoint.com/submit'; // Replace with your actual API endpoint
+  
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          genres: selectedGenres
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data; // You can also handle the response data as needed
+    } catch (error) {
+      console.error('Error submitting user selection:', error);
+    }
+  };
+  
+  // Usage in the handleSubmit function
   const handleSubmit = () => {
-    // Handle form submission
-    onComplete();
+    postUserSelection(selectedGenres)
+      .then(data => {
+        // Handle success - data contains the response from your API
+        console.log('Submission successful', data);
+        onComplete();
+      })
+      .catch(error => {
+        // Handle errors
+        console.error('Submission failed', error);
+      });
   };
 
   return (
@@ -25,6 +65,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           <CheckboxGroup
             label="Tell me what you like!"
             defaultValue={[]}
+            onChange={handleCheckboxChange}
           >
             <Checkbox value="action">Action</Checkbox>
             <Checkbox value="adventure">Adventure</Checkbox>
