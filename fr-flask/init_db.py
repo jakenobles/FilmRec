@@ -31,15 +31,14 @@ cur.execute('''CREATE TABLE time_period (
 
 # Creation for the user_data table (passwords will be added later)
 cur.execute('''CREATE TABLE user_data (
-                    user_id SERIAL PRIMARY KEY,
-                    username VARCHAR(255) NOT NULL,
+                    username VARCHAR(255) PRIMARY KEY NOT NULL,
                     password bytea NOT NULL
             );''')
 
 # Creation for the preferences table (ADD TIME PERIOD, FOREIGN)
 cur.execute("""
             CREATE TABLE preferences (
-                user_id INTEGER PRIMARY KEY REFERENCES user_data(user_id),
+                username VARCHAR(255) PRIMARY KEY REFERENCES user_data(username),
                 action BOOLEAN NOT NULL,
                 adventure BOOLEAN NOT NULL,
                 animation BOOLEAN NOT NULL,
@@ -61,8 +60,7 @@ cur.execute("""
                 thriller BOOLEAN NOT NULL,
                 war BOOLEAN NOT NULL,
                 western BOOLEAN NOT NULL,
-                ok_with_foreign BOOLEAN NOT NULL,
-                time_period_id INTEGER REFERENCES time_period(time_period_id)
+                ok_with_foreign BOOLEAN NOT NULL
             );
 """)
 
@@ -70,32 +68,12 @@ cur.execute("""
 cur.execute('''
             CREATE TABLE watched_movies (
                 id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES user_data(user_id),
+                username VARCHAR(255) REFERENCES user_data(username),
                 movie_id VARCHAR(255) NOT NULL,
                 movie_title VARCHAR(255) NOT NULL,
                 favorite BOOLEAN NOT NULL
             );
             ''')
-
-
-
-# Insert data into the time period table
-cur.execute("""
-            INSERT INTO time_period (time_period_id, time_period) VALUES 
-                (1, 'Pre-1900s'),
-                (2, '1900s-1910s'),
-                (3, '1920s'),
-                (4, '1930s'),
-                (5, '1940s'),
-                (6, '1950s'),
-                (7, '1960s'),
-                (8, '1970s'),
-                (9, '1980s'),
-                (10, '1990s'),
-                (11, '2000s'),
-                (12, '2010s'),
-                (13, '2020s');
-            """)
 
 
 # # Insert test data into the user_data table
