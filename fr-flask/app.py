@@ -108,8 +108,10 @@ def store_genre():
         if word in genre_dict:
             # Update the value to 1
             genre_dict[word] = 1
+    
+    delete_query = f"DELETE FROM preferences WHERE username = %s"
 
-    return print(genre_dict)
+    insert_query = f"INSERT INTO preferences"
 
 
 if __name__ == '__main__':

@@ -4,7 +4,6 @@ import LoginComponent from '../components/LoginComponent';
 import QuestionnaireComponent from '../components/QuestionnaireComponent';
 import MovieListComponent from '../components/MovieListComponent';
 import RecommendationComponent from '../components/RecommendationComponent';
-import {Button} from "@nextui-org/button"
 
 
 const Home: React.FC = () => {
