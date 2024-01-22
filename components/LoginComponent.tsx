@@ -8,6 +8,7 @@ interface LoginComponentProps {
   onLoginSuccess: () => void;
 }
 
+//Logs in the user and retrieves cookies for sessions.
 const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,10 +18,11 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
   const handleAuth = async () => {
     const apiUrl = isLoginMode 
       ? 'http://127.0.0.1:5000/api/login' 
-      : 'http://127.0.0.1:5000/api/register'; // Adjust the API endpoint for registration
+      : 'http://127.0.0.1:5000/api/register';
     
     setError(''); // Reset error message
 
+    //Posting to my API and retrieving cookies throught the credentials attribute
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -28,7 +30,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
-        credentials: 'include', // This is crucial for cookies
+        credentials: 'include',
       });
 
       if (!response.ok) {
