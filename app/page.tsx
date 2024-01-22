@@ -4,6 +4,7 @@ import LoginComponent from '../components/LoginComponent';
 import QuestionnaireComponent from '../components/QuestionnaireComponent';
 import MovieListComponent from '../components/MovieListComponent';
 import RecommendationComponent from '../components/RecommendationComponent';
+import {Button} from "@nextui-org/button"
 
 
 const Home: React.FC = () => {
@@ -31,17 +32,27 @@ const Home: React.FC = () => {
     checkSession();
   }, []);
 
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+  };
+
 
   return (
     <div className="container mx-auto min-h-screen">
-      {!isLoggedIn ? (
-        <LoginComponent onLoginSuccess={() => setIsLoggedIn(true)} />
-      ) : !showQuestionnaire ? (
-        <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} />
-      ) : !recommendation ? (
-        <MovieListComponent onSubmit={(list) => { setMovieList(list); setRecommendation('Your Movie'); }} />
+            {isLoggedIn ? (
+        <>
+          {showQuestionnaire ? (
+            !recommendation ? (
+              <MovieListComponent onSubmit={(list) => { setMovieList(list); setRecommendation('Your Movie'); setShowQuestionnaire(true); }} setShowQuestionnaire={setShowQuestionnaire} />
+            ) : (
+              <RecommendationComponent recommendation={recommendation} />
+            )
+          ) : (
+            <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} />
+          )}
+        </>
       ) : (
-        <RecommendationComponent recommendation={recommendation} />
+        <LoginComponent onLoginSuccess={() => setIsLoggedIn(true)} />
       )}
     </div>
   );

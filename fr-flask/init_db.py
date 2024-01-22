@@ -1,11 +1,18 @@
 import os
 import psycopg2
 
+#Environment Variables
+# Database connection parameters should be in environment variables or a config file
+DB_HOST = os.getenv('DB_HOST')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+
 conn = psycopg2.connect(
-        host="localhost",
-        database="postgres",
-        user='postgres',
-        password='Jjakebox12341!')
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD)
 
 # Open a cursor to perform database operations
 cur = conn.cursor()
@@ -65,7 +72,8 @@ cur.execute('''
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER REFERENCES user_data(user_id),
                 movie_id VARCHAR(255) NOT NULL,
-                movie_title VARCHAR(255) NOT NULL
+                movie_title VARCHAR(255) NOT NULL,
+                favorite BOOLEAN NOT NULL
             );
             ''')
 

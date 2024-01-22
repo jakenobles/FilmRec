@@ -37,8 +37,13 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
                     </CardBody>
             </Card>
             <div className='flex flex-row justify-center items-center'>
-                <Button color='primary' variant='bordered' className='mt-4 mr-2'>Watched</Button>
+                <Button color='primary' variant='bordered' className='mt-4 mr-2'>Add to Watched</Button>
                 <Button color='primary' variant='bordered' className='mt-4 ml-2'>Reroll</Button>
+            </div>
+            <div className='flex flex-row justify-center items-center'>
+                <Button color='primary' variant='bordered' className='mt-4 mr-2'>Edit Preferences</Button>
+                <Button color='primary' variant='bordered' className='mt-4 ml-2'>Edit Watched List</Button>
+                <Button color='primary' variant='bordered' className='mt-4 ml-2'>Edit Favorites</Button>
             </div>
         </div>
     </section>

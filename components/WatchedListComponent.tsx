@@ -5,9 +5,8 @@ import {Image} from "@nextui-org/image";
 import {Button} from "@nextui-org/button"
 
 
-interface MovieListComponentProps {
+interface WatchedListComponent {
   onSubmit: (movieList: string[]) => void;
-  setShowQuestionnaire: (show: boolean) => void;
 }
 
 //Limits the amount of calls to API
@@ -21,7 +20,7 @@ const debounce = (func, delay) => {
   };
 };
 
-const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setShowQuestionnaire }) => {
+const WatchedListComponent: React.FC<WatchedListComponent> = ({ onSubmit }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMovies, setSelectedMovies] = useState([]);
@@ -93,12 +92,25 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     }
   };
 
-  // Handler for "Go Back" button click
-  const handleBack = () => {
-    // Call the callback function to set setShowQuestionaire to true
-    setShowQuestionnaire(false);
+  const MovieCard = ({ movie }) => {
+    return (
+      <div className="flex flex-col items-center m-2 w-full hover:bg-gray-800 p-2 rounded cursor-pointer" onClick={() => removeMovieFromList(movie.id)}>
+        <img src={movie.posterUrl} alt={movie.title} className="w-full h-auto" />
+        <h3 className="mt-2">{movie.title}</h3>
+      </div>
+    );
   };
-   
+
+  const MovieGrid = ({ movies }) => {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[750px] p-4">
+        {movies.map(movie => (
+          <MovieCard key={movie.id} movie={movie} />
+        ))}
+      </div>
+    );
+  };
+  
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
@@ -129,32 +141,18 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
         </CardBody>
       </Card>
       
-      <Card className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3 scrollbar-hide'>
+      <Card className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3 scrollbar-hide mb-4'>
         <CardHeader className='items-center justify-center flex flex-col'>
-          <h1 className='text-2xl mb-2'>Your List</h1>
-          <p className='text-base mb-2'>Click on a movie to remove it.</p>
+          <h1 className='text-xl mb-2 text-center'>Your List</h1>
+          <CardBody>
+            <MovieGrid movies={movies} />
+          </CardBody>
         </CardHeader>
-        <CardBody className='scrollbar-hide'>
-          {selectedMovies.map(movie => (
-            <div key={movie.id} className='flex flex-row mb-2 hover:bg-gray-800 p-2 rounded cursor-pointer' onClick={() => removeMovieFromList(movie.id)}>
-              <Image
-                width={75}
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                alt={movie.title}
-              />
-              <div className='flex-grow flex flex-col justify-center items-center text-center'>
-                <h1 className='font-bold text-lg'>{movie.title}</h1>
-                <p className='italic text-base'>{movie.release_date.split('-')[0]}</p>
-              </div>
-            </div>
-          ))}
-        </CardBody>
-
       </Card>
+      
       <Button onClick={submitMovies} color='primary' variant='bordered' className='mt-4'>Recommend a Movie!</Button>
-      <Button onClick={handleBack} color='primary' variant='bordered' className='mt-4'>Go Back</Button>
     </div>
   );
 };
 
-export default MovieListComponent;
+export default WatchedListComponent;

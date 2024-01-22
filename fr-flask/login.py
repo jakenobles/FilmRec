@@ -1,6 +1,6 @@
 import bcrypt
 from db import DB
-from Flask import jsonify
+from flask import jsonify
 
 class Login:
     #Hashes password to compare to the stored password

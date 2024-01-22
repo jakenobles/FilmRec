@@ -73,6 +73,43 @@ def check_session():
         return jsonify(logged_in_as=current_user), 200
     else:
         return jsonify(logged_in=False), 401
+    
+#Gets the user's genre profile and stores it
+@app.route('/api/store/profile', methods=['POST'])
+def store_genre():
+    data = request.json
+
+    genre_dict = {
+        'action' : 0,
+        'adventure' : 0,
+        'animation' : 0,
+        'biography' : 0,
+        'comedy' : 0,
+        'crime' : 0,
+        'documentary' : 0,
+        'drama' : 0,
+        'fantasy' : 0,
+        'film_noir' : 0,
+        'history' : 0,
+        'horror' : 0,
+        'music' : 0,
+        'musical' : 0,
+        'mystery' : 0,
+        'romance' : 0,
+        'sci_fi' : 0,
+        'sport' : 0,
+        'thriller' : 0,
+        'war' : 0,
+        'western' : 0,
+        'foreign' : 0
+    }
+    
+    for word in data['genres']:
+        if word in genre_dict:
+            # Update the value to 1
+            genre_dict[word] = 1
+
+    return print(genre_dict)
 
 
 if __name__ == '__main__':

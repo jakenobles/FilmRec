@@ -15,7 +15,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
   };
 
   const postUserSelection = async (selectedGenres) => {
-    const apiUrl = 'https://your-api-endpoint.com/submit'; // Replace with your actual API endpoint
+    const apiUrl = 'http://127.0.0.1:5000/api/store/profile'; // Replace with your actual API endpoint
   
     try {
       const response = await fetch(apiUrl, {
