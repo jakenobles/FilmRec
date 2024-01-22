@@ -9,11 +9,17 @@ interface LoginComponentProps {
 }
 
 const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoginMode, setIsLoginMode] = useState(true); // Toggle between login and registration
+  const [error, setError] = useState('');
 
-  const handleLogin = async () => {
-    const apiUrl = 'http://127.0.0.1:5000/api/login'; // Replace with your API endpoint
+  const handleAuth = async () => {
+    const apiUrl = isLoginMode 
+      ? 'http://127.0.0.1:5000/api/login' 
+      : 'http://127.0.0.1:5000/api/register'; // Adjust the API endpoint for registration
+    
+    setError(''); // Reset error message
 
     try {
       const response = await fetch(apiUrl, {
@@ -21,7 +27,8 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
+        credentials: 'include', // This is crucial for cookies
       });
 
       if (!response.ok) {
@@ -29,10 +36,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
       }
 
       const data = await response.json();
-      // Call onLoginSuccess if login is successful
       onLoginSuccess();
     } catch (error) {
-      console.error('Login failed:', error);
+      setError(error.message);
     }
   };
 
@@ -49,15 +55,20 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
       </div>
       <div className='flex flex-col items-center justify-center w-full max-w-md relative z-20 font-sans'>
         <Card className='w-full'>
-          <CardHeader>Login / Register</CardHeader>
+          <CardHeader>{isLoginMode ? 'Login' : 'Register'}</CardHeader>
           <CardBody>
+            {error && (
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+            )}
             <Input
               className="mb-2"
-              type="email"
-              label="Email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="username"
+              label="Username"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <Input
               className="mb-2"
@@ -67,7 +78,17 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button onClick={handleLogin} color='primary' variant='bordered'>Login/Register</Button>       
+            <Button onClick={handleAuth} color='primary' variant='bordered'>
+              {isLoginMode ? 'Login' : 'Register'}
+            </Button>
+            <Button
+              color='secondary'
+              variant='flat'
+              onClick={() => setIsLoginMode(!isLoginMode)}
+              className='mt-2'
+            >
+              Switch to {isLoginMode ? 'Register' : 'Login'}
+            </Button>        
           </CardBody>
         </Card>
       </div>
