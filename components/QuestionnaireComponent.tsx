@@ -5,9 +5,10 @@ import {Button} from "@nextui-org/button"
 
 interface QuestionnaireComponentProps {
   onComplete: () => void;
+  username: string; 
 }
 
-const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onComplete }) => {
+const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onComplete, username }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
   const handleCheckboxChange = (value: string[]) => {
@@ -15,7 +16,8 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
   };
 
   const postUserSelection = async (selectedGenres) => {
-    const apiUrl = 'http://127.0.0.1:5000/api/store/profile'; // Replace with your actual API endpoint
+    console.log('test')
+    const apiUrl = 'http://127.0.0.1:5000/api/store/profile'; 
   
     try {
       const response = await fetch(apiUrl, {
@@ -24,6 +26,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          username: username,
           genres: selectedGenres
         }),
       });
