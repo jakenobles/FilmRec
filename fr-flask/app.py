@@ -205,7 +205,9 @@ def get_recommendation():
 
     recommendation = Chat.chat_gpt(prompt)
 
-    print(jsonify(recommendation))
+    print(recommendation)
+    print(type(recommendation))
+    print(type(jsonify(recommendation)))
 
     return jsonify(recommendation), 200
   

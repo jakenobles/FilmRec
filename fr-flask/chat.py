@@ -11,7 +11,7 @@ class Chat:
       model="gpt-4-1106-preview",
       response_format={ "type": "json_object" },
       messages=[
-        {"role": "system", "content": "Given a preference profile of liked genres, whether or not the user likes foreign films, and a time period of movies the user likes as well as a list of watched and liked movies, I want you to recommend my users ONE movie. Return the name of the movie, the year it came out, and a short description of why the user would like it based on their past liked movies in JSON format. It is of the utmost importance that you not recommend a movie that is already in the watched list."},
+        {"role": "system", "content": "Given a preference profile of liked genres, whether or not the user likes foreign films, and a time period of movies the user likes as well as a list of watched and liked movies, I want you to recommend my users ONE movie. Return the name of the movie (if it has a foreign name, please translate it to English), the year it came out, the movie's TMDB id, and a short description of why the user would like it based on their past liked movies in JSON format (Key value names: title, year, id, reason). It is of the utmost importance that you not recommend a movie that is already in the watched list."},
         {"role": "user", "content": f"{prompt}"}
       ]
     )

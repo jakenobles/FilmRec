@@ -5,31 +5,18 @@ import NextImage from "next/image";
 import {Button} from "@nextui-org/button"
 
 interface RecommendationComponentProps {
-  recommendation: string;
-  username: string;
+  recommendation: {
+    title: string;
+    year: number;
+    id: number;
+    reason: string;
+    // Add other properties if necessary
+  };
 }
 
-const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation, username }) => {
-    const [recommendedMovie, setRecommendedMovie] = useState<any>(null); // State to store recommended movie data
-  
-    useEffect(() => {
-      // Create a request body object with the username
-      const requestBody = {
-        username: username,
-      };
-  
-      // Make a POST request to your API to fetch the recommended movie data with the username
-      fetch('http://127.0.0.1:5000/api/recommendation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      })
-        .then(response => response.json())
-        .then(data => setRecommendedMovie(data))
-        .catch(error => console.error('Error fetching recommended movie:', error));
-    }, [username]);
+const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation }) => {
+
+  console.log(recommendation)
   
     return (
       <section className="flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
@@ -37,21 +24,21 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
           <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12 mb-2" />
         </nav>
         <div className="flex flex-col items-center justify-content-center">
-          {recommendedMovie && (
+          {recommendation && (
             <>
               <Image
                 as={NextImage}
                 width={300}
                 height={200}
-                src={recommendedMovie.posterUrl} // Replace with the URL of the recommended movie's poster image
-                alt={recommendedMovie.title}
+                src={recommendation.posterUrl} // Replace with the URL of the recommended movie's poster image
+                alt={recommendation.title}
               />
               <h1 className="text-center mt-2 mb-2 text-2xl">
-                <strong>{recommendedMovie.title}</strong> ({recommendedMovie.releaseYear})
+                <strong>{recommendation.title}</strong> ({recommendation.year})
               </h1>
               <Card className="mt-2">
                 <CardBody>
-                  <p className="text-center italic">{recommendedMovie.reason}</p>
+                  <p className="text-center italic">{recommendation.reason}</p>
                 </CardBody>
               </Card>
               <Card className="mt-2 mb-0 max-w-prose">
@@ -59,7 +46,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
                   <h1>Description</h1>
                 </CardHeader>
                 <CardBody>
-                  <p className="">{recommendedMovie.description}</p>
+                  <p className="">{recommendation.description}</p>
                 </CardBody>
               </Card>
             </>
@@ -71,7 +58,6 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
           <div className='flex flex-row justify-center items-center'>
             <Button color='primary' variant='bordered' className='mt-4 mr-2'>Edit Preferences</Button>
             <Button color='primary' variant='bordered' className='mt-4 ml-2'>Edit Watched List</Button>
-            <Button color='primary' variant='bordered' className='mt-4 ml-2'>Edit Favorites</Button>
           </div>
         </div>
       </section>

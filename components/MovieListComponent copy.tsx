@@ -55,6 +55,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   
   const handleSubmit = () => {
     // Implement movie list submission logic
+    const movieList = ["Movie 1", "Movie 2"]; // Replace with actual list
     onSubmit(movieList);
   };
 
@@ -103,32 +104,6 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     // Call the callback function to set setShowQuestionaire to true
     setShowQuestionnaire(false);
   };
-
-  const MovieCard = ({ movie }) => {
-    const posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-
-    return (
-      <div className="flex flex-col items-center justify-center w-full hover:bg-gray-800 p-2 rounded cursor-pointer" onClick={() => removeMovieFromList(movie.id)}>
-        <Image
-                width={100}
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                alt={movie.title}
-              />
-        <h3 className="mt-2">{movie.title}</h3>
-      </div>
-    );
-  };
-
-  const MovieGrid = ({ movies }) => {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[750px] p-4">
-        {movies.map(movie => (
-          <MovieCard key={movie.id} movie={movie} />
-        ))}
-      </div>
-    );
-  };
-  
    
 
   return (
@@ -136,11 +111,11 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
       <nav className="w-full flex justify-center items-center">
 				<img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12" />
 			</nav>
-      <h1 className='text-3xl mb-5 text-center'>Enter your liked movies!</h1>
+      <h1 className='text-3xl mb-5 text-center'>Enter your favorite movies!</h1>
 
       <Card className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3 scrollbar-hide mb-4'>
         <CardHeader className='items-center justify-center flex flex-col'>
-          <h1 className='text-l mb-2'>Minimum five movies.</h1>
+          <h1 className='text-l mb-2'>Maximum five movies.</h1>
           <Input placeholder='Search a movie title' value={searchTerm} onChange={handleSearchChange} />
         </CardHeader>
         <CardBody className='scrollbar-hide'>
@@ -160,15 +135,28 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
         </CardBody>
       </Card>
       
-      <Card className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3 scrollbar-hide mb-4'>
+      <Card className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3 scrollbar-hide'>
         <CardHeader className='items-center justify-center flex flex-col'>
-          <h1 className='text-xl mb-2 text-center'>Your List</h1>
-          <CardBody className='max-h-[375px] overflow-y-auto'>
-            <MovieGrid movies={selectedMovies} />
-          </CardBody>
+          <h1 className='text-2xl mb-2'>Your List</h1>
+          <p className='text-base mb-2'>Click on a movie to remove it.</p>
         </CardHeader>
+        <CardBody className='scrollbar-hide'>
+          {selectedMovies.map(movie => (
+            <div key={movie.id} className='flex flex-row mb-2 hover:bg-gray-800 p-2 rounded cursor-pointer' onClick={() => removeMovieFromList(movie.id)}>
+              <Image
+                width={75}
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                alt={movie.title}
+              />
+              <div className='flex-grow flex flex-col justify-center items-center text-center'>
+                <h1 className='font-bold text-lg'>{movie.title}</h1>
+                <p className='italic text-base'>{movie.release_date.split('-')[0]}</p>
+              </div>
+            </div>
+          ))}
+        </CardBody>
+
       </Card>
-      
       <Button onClick={submitMovies} color='primary' variant='bordered' className='mt-4'>Recommend a Movie!</Button>
       <Button onClick={handleBack} color='primary' variant='bordered' className='mt-4'>Go Back</Button>
     </div>
