@@ -32,3 +32,4 @@ class DB:
         with DB.get_db_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, params)
+                conn.commit()

@@ -8,7 +8,7 @@ import os
 #Starting the Flask app
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Change this to a random secret key
-app.config['JWT_COOKIE_SAMESITE'] = 'None'  # Set to 'Lax' or 'Strict' as per your requirement
+app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Set to 'Lax' or 'Strict' as per your requirement
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 jwt = JWTManager(app)
 
@@ -27,7 +27,6 @@ def register_user():
    #Check if user already exists
    query_check = "SELECT * FROM user_data WHERE username = %s"
    existing_user = DB.execute_db_query(query_check, (username,))
-   print(existing_user)
    if len(existing_user) > 0:
         return jsonify({"error": "Username already taken"}), 409
    
@@ -103,16 +102,52 @@ def store_genre():
         'western' : 0,
         'foreign' : 0
     }
-    
+
+
+    #Changing all values present to 1 (TRUE)
     for word in data['genres']:
         if word in genre_dict:
             # Update the value to 1
             genre_dict[word] = 1
+
+    #Convert genre_dict values to boolean
+    genre_values = [value == 1 for value in genre_dict.values()]
+
+    #Database queries
+    delete_query = "DELETE FROM preferences WHERE username = %s;"
+    insert_query = "INSERT INTO preferences (username, action, adventure, animation, biography, comedy, crime, documentary, drama, fantasy, film_noir, history, horror, music, musical, mystery, romance, sci_fi, sport, thriller, war, western, ok_with_foreign) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+
+    try:
+    #Deletes old profile
+        DB.execute_db_insert(delete_query, (data['username'], ))
+
+        #Inserts new profile
+        DB.execute_db_insert(insert_query, (str(data['username']), *genre_values))
+
+        return jsonify({'message': 'Profile stored successfully'}), 200
     
-    delete_query = f"DELETE FROM preferences WHERE username = %s"
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/store/watched', methods=['POST'])
+def add_watched():
+    data = request.json
 
-    insert_query = f"INSERT INTO preferences"
+    insert_query = "INSERT INTO watched_movies (username, movie_id, movie_title, favorite) VALUES (%s, %s, %s, %s);"
 
+    if data['favorite'] == 1:
+        is_favorite = True
+    else:
+        is_favorite = False
+
+    try:
+        #Inserts new profile
+        DB.execute_db_insert(insert_query, (data['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
+
+        return jsonify({'message': 'Profile stored successfully'}), 200
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

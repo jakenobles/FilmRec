@@ -8,7 +8,10 @@ import {Button} from "@nextui-org/button"
 interface MovieListComponentProps {
   onSubmit: (movieList: string[]) => void;
   setShowQuestionnaire: (show: boolean) => void;
+  username: string;
 }
+
+
 
 //Limits the amount of calls to API
 const debounce = (func, delay) => {
@@ -21,7 +24,7 @@ const debounce = (func, delay) => {
   };
 };
 
-const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setShowQuestionnaire }) => {
+const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setShowQuestionnaire, username }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMovies, setSelectedMovies] = useState([]);
@@ -57,11 +60,13 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   };
 
   const addMovieToList = (movie) => {
-    if (selectedMovies.find((m) => m.id === movie.id)) {
+    if (selectedMovies.length < 5 && !selectedMovies.find((m) => m.id === movie.id)) {
+      setSelectedMovies([...selectedMovies, movie]);
+    } else if (selectedMovies.length >= 5) {
+      console.log('Maximum of 5 movies reached');
+    } else {
       console.log('Movie already added');
-      return; // Avoid adding duplicates
     }
-    setSelectedMovies([...selectedMovies, movie]);
   };
 
   const removeMovieFromList = (movieId) => {
@@ -72,12 +77,13 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const submitMovies = async () => {
     try {
       for (const movie of selectedMovies) {
-        const response = await fetch('YOUR_API_ENDPOINT', {
+        const response = await fetch('http://127.0.0.1:5000/api/store/watched', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(movie),
+          body: 
+          JSON.stringify({username : username, movie : movie, favorite : 1}),
         });
 
         if (!response.ok) {

@@ -9,6 +9,7 @@ import RecommendationComponent from '../components/RecommendationComponent';
 const Home: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [showQuestionnaire, setShowQuestionnaire] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('');
   const [movieList, setMovieList] = useState<string[]>([]);
   const [recommendation, setRecommendation] = useState<string | null>(null);
 
@@ -42,16 +43,16 @@ const Home: React.FC = () => {
         <>
           {showQuestionnaire ? (
             !recommendation ? (
-              <MovieListComponent onSubmit={(list) => { setMovieList(list); setRecommendation('Your Movie'); setShowQuestionnaire(true); }} setShowQuestionnaire={setShowQuestionnaire} />
+              <MovieListComponent onSubmit={(list) => { setMovieList(list); setRecommendation('Your Movie'); setShowQuestionnaire(true); }} setShowQuestionnaire={setShowQuestionnaire} username={username} />
             ) : (
               <RecommendationComponent recommendation={recommendation} />
             )
           ) : (
-            <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} />
+            <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} username={username} />
           )}
         </>
       ) : (
-        <LoginComponent onLoginSuccess={() => setIsLoggedIn(true)} />
+        <LoginComponent onLoginSuccess={() => setIsLoggedIn(true)} setGlobalUsername={setUsername} />
       )}
     </div>
   );

@@ -6,10 +6,11 @@ import {Button} from "@nextui-org/react";
 
 interface LoginComponentProps {
   onLoginSuccess: () => void;
+  setGlobalUsername: (username: string) => void; // New prop for updating the global username
 }
 
 //Logs in the user and retrieves cookies for sessions.
-const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
+const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess, setGlobalUsername }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoginMode, setIsLoginMode] = useState(true); // Toggle between login and registration
@@ -38,6 +39,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess }) => {
       }
 
       const data = await response.json();
+      setGlobalUsername(username);
       onLoginSuccess();
     } catch (error) {
       setError(error.message);
