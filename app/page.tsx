@@ -45,7 +45,7 @@ const Home: React.FC = () => {
             !recommendation ? (
               <MovieListComponent onSubmit={(list) => { setMovieList(list); setRecommendation('Your Movie'); setShowQuestionnaire(true); }} setShowQuestionnaire={setShowQuestionnaire} username={username} />
             ) : (
-              <RecommendationComponent recommendation={recommendation} />
+              <RecommendationComponent recommendation={recommendation} username={username} />
             )
           ) : (
             <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} username={username} />
