@@ -15,8 +15,6 @@ interface RecommendationComponentProps {
 }
 
 const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation }) => {
-
-  console.log(recommendation)
   
     return (
       <section className="flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">

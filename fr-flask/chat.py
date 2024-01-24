@@ -13,9 +13,25 @@ class Chat:
       model="gpt-4-1106-preview",
       response_format={ "type": "json_object" },
       messages=[
-        {"role": "system", "content": "Given a preference profile of liked genres, whether or not the user likes foreign films, and a time period of movies the user likes as well as a list of watched and liked movies, I want you to recommend my users ONE movie. Return the name of the movie (if it has a foreign name, please translate it to English), the year it came out, the movie's TMDB id, and a short description of why the user would like it based on their past liked movies in JSON format (Key value names: title, year, id, reason). Be colloquial with your reasoning, for example if the user likes foreign movies, or other genres, dont just plain say it, that is implied. Take that into account, just dont say it outright. It is of the utmost importance that you not recommend a movie that is already in the watched list."},
+        {"role": "system", "content": """Using the detailed preference profile provided for each user, which includes specific genres they like (e.g., drama, sci-fi, comedy), their openness to foreign films (yes/no), their preferred era of movies (e.g., 80s, 2000s), and a comprehensive list of movies they have already watched and enjoyed, your task is to recommend precisely ONE movie. The output should be formatted in JSON with the following structure and key names:
+
+            'title': This is the name of the movie. If the movie is not originally in English, provide its title translated into English.
+            'year': Indicate the year of release of the movie.
+            'id': This refers to the movie's The Movie Database (TMDB) identification number. It is crucial that this ID is exact and corresponds to the recommended movie.
+            'reason': Provide a succinct yet engaging explanation tailored to the user's preferences, explaining why this particular movie is a suitable recommendation. This should read naturally and conversationally.
+
+        IMPORTANT INSTRUCTIONS:
+
+            Consistency Check: Ensure that the movie title referred to in the 'reason' section is exactly the same as the movie title listed under the 'title' key. They must match word-for-word.
+            TMDB ID Verification: The TMDB id provided must be cross-checked to confirm it corresponds directly to the recommended movie. This is to ensure that there are no errors in movie identification. Ensuring you have the correct movie ID is the most important part of the process.
+            Avoiding Repetition: Cross-reference the user's watched list to guarantee that the recommended movie is not one the user has already seen.
+            Implicit Reasoning: In the 'reason' section, avoid explicitly stating the user's preferences. Instead, weave these preferences into the recommendation in a way that feels natural and unforced. For instance, if recommending a foreign film, do not simply state 'because you like foreign films', but rather highlight specific elements of the film that align with the user's tastes.
+
+        This detailed approach is designed to optimize the relevance and accuracy of the movie recommendation, ensuring that it is both personalized and precise. Carefully follow these guidelines to deliver a recommendation that is perfectly tailored to the user's unique profile."""},
+
         {"role": "user", "content": f"{prompt}"}
-      ]
+      ],
+      temperature=0
     )
     return (response.choices[0].message.content)
   
@@ -46,10 +62,6 @@ class Chat:
 
     user_genre_prefs = list(user_genres[0][1:-1])
 
-    print("LOOK HERE!!!!!!!!!!" + str(len(user_genre_prefs)))
-
-    print(str(len(genres)))
-
     genre_prefs_dict = {genres[i]: user_genre_prefs[i] for i in range(len(genres))}
     
     liked_genres = [genre for genre, liked in genre_prefs_dict.items() if liked]
@@ -79,8 +91,6 @@ class Chat:
   @staticmethod
   def process_recommendation(recommendation):
     rec_dict = json.loads(recommendation)
-
-    print(rec_dict['id'])
 
     movie_data = Chat.get_movie_details(rec_dict['id'])
 

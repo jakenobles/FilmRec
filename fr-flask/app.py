@@ -10,7 +10,7 @@ import os
 #Starting the Flask app
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Change this to a random secret key
-app.config['JWT_COOKIE_SAMESITE'] = 'Lax'  # Set to 'Lax' or 'Strict' as per your requirement
+app.config['JWT_COOKIE_SAMESITE'] = 'None'  # Set to 'Lax' or 'Strict' as per your requirement
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 jwt = JWTManager(app)
 
@@ -71,7 +71,8 @@ def login():
 def check_session():
     current_user = get_jwt_identity()
     if current_user:
-        return jsonify(logged_in_as=current_user), 200
+        user_dict = {'username' : current_user}
+        return jsonify(user_dict), 200
     else:
         return jsonify(logged_in=False), 401
     
@@ -114,6 +115,7 @@ def store_genre():
 
     #Convert genre_dict values to boolean
     genre_values = [value == 1 for value in genre_dict.values()]
+    
 
     #Database queries
     delete_query = "DELETE FROM preferences WHERE username = %s;"
@@ -166,6 +168,8 @@ def get_recommendation():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+    print("test! " + str(user_genres))
+    
     prompt_genres = Chat.process_genres(user_genres)[0]
 
     ok_with_foreign = Chat.process_genres(user_genres)[1]
@@ -177,6 +181,8 @@ def get_recommendation():
     recommendation = Chat.chat_gpt(prompt)
 
     response = Chat.process_recommendation(recommendation)
+
+    print(response)
 
     return response, 200
 

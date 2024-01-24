@@ -26,6 +26,8 @@ const Home: React.FC = () => {
         });
 
         if (response.ok) {
+          const data = await response.json();
+          setUsername(data.username)
           setIsLoggedIn(true);
         }
       } catch (error) {
@@ -36,10 +38,23 @@ const Home: React.FC = () => {
     checkSession();
   }, []);
 
+  //Checks if there is a valid session ID on load
+  useEffect(() => {
+    const loggedIn = async () => {
+      setIsLoading(true);
+      handleMovieListSubmit(username);
+      setShowQuestionnaire(true)
+    };
+
+    loggedIn();
+  }, [username]);
+  
+
+
   //Submits the movie list to Flask to then create a recommendation
-  const handleMovieListSubmit = async (list) => {
-    setMovieList(list);
+  const handleMovieListSubmit = async (userName : string) => {
     setIsLoading(true);
+    console.log(username + " IN HANDLE ML")
   
     const url = 'http://127.0.0.1:5000/api/recommendation'; 
   
@@ -50,7 +65,7 @@ const Home: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username : username
+          username : userName
         }),
       });
       const recommendationData = await response.json();
