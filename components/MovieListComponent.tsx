@@ -55,14 +55,13 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   
   const handleSubmit = () => {
     // Implement movie list submission logic
-    onSubmit(movieList);
+    onSubmit(selectedMovies);
   };
 
   const addMovieToList = (movie) => {
-    if (selectedMovies.length < 5 && !selectedMovies.find((m) => m.id === movie.id)) {
+    // Check if the movie is already in the list
+    if (!selectedMovies.find((m) => m.id === movie.id)) {
       setSelectedMovies([...selectedMovies, movie]);
-    } else if (selectedMovies.length >= 5) {
-      console.log('Maximum of 5 movies reached');
     } else {
       console.log('Movie already added');
     }

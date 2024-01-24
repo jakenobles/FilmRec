@@ -75,7 +75,10 @@ cur.execute('''
             );
             ''')
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3fff1a3957a8ee3571367c58009f2aaf5b3ac228
 # # Insert test data into the user_data table
 # cur.execute('''INSERT INTO user_data(user_id, username, password)
 #                     VALUES 

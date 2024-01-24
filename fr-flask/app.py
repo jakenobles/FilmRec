@@ -4,6 +4,7 @@ from flask_cors import CORS
 from db import DB
 from login import Login
 from chat import Chat
+import json
 import os
 
 #Starting the Flask app
@@ -165,56 +166,19 @@ def get_recommendation():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-    #Processing the genres
-    #Creates a dictionary with Genres and selected user preferences, then appends the liked genres string with all of the user's preferred genres.
-    genres = [
-    "action", "adventure", "animation", "biography", "comedy", "crime",
-    "documentary", "drama", "fantasy", "film_noir", "history", "horror",
-    "music", "musical", "mystery", "romance", "sci_fi", "sport",
-    "thriller", "war", "western"
-    ]
+    prompt_genres = Chat.process_genres(user_genres)[0]
 
-    user_genre_prefs = list(user_genres[0][1:-2])
-
-    genre_prefs_dict = {genres[i]: user_genre_prefs[i] for i in range(len(genres))}
+    ok_with_foreign = Chat.process_genres(user_genres)[1]
     
-    liked_genres = [genre for genre, liked in genre_prefs_dict.items() if liked]
-
-    prompt_genres = ""
-    
-    for genre in liked_genres:
-        prompt_genres += f"{genre}, "
-
-    #Process the watched_list
-    #Appends all watched movies together in a string.
-    watched_movies = ""
-    for movie in watched_list:
-        watched_movies += f"{movie[3]}, "
-
-    #Checks if user is ok with foreign movies.
-    if user_genres[0][-2] == True:
-        ok_with_foreign = "User is ok with foreign films."
-    ok_with_foreign = "User does not like foreign films."
-
-    print(ok_with_foreign)
-    
-    print(prompt_genres)
-    print(watched_movies)
+    watched_movies = Chat.process_watched(watched_list)
 
     prompt = f"User Genre Likes: {prompt_genres}. {ok_with_foreign} Watched and Liked Movies: {watched_movies}"
 
     recommendation = Chat.chat_gpt(prompt)
 
-    print(recommendation)
-    print(type(recommendation))
-    print(type(jsonify(recommendation)))
+    response = Chat.process_recommendation(recommendation)
 
-    return jsonify(recommendation), 200
-  
-
-    # recommendations = chat_gpt(prompt)
-
-    # return recommendations
+    return response, 200
 
 if __name__ == '__main__':
     app.run(debug=True)

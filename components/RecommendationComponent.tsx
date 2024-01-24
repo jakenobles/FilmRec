@@ -23,21 +23,19 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
         <nav className="w-full flex justify-center items-center">
           <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12 mb-2" />
         </nav>
-        <div className="flex flex-col items-center justify-content-center">
+        <div className="flex flex-col items-center justify-content-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
           {recommendation && (
             <>
               <Image
-                as={NextImage}
                 width={300}
-                height={200}
-                src={recommendation.posterUrl} // Replace with the URL of the recommended movie's poster image
+                src={`https://image.tmdb.org/t/p/w500${recommendation.poster_path}`}
                 alt={recommendation.title}
               />
               <h1 className="text-center mt-2 mb-2 text-2xl">
                 <strong>{recommendation.title}</strong> ({recommendation.year})
               </h1>
               <Card className="mt-2">
-                <CardBody>
+                <CardBody className='max-w-prose'>
                   <p className="text-center italic">{recommendation.reason}</p>
                 </CardBody>
               </Card>
@@ -46,7 +44,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
                   <h1>Description</h1>
                 </CardHeader>
                 <CardBody>
-                  <p className="">{recommendation.description}</p>
+                  <p className="">{recommendation.overview}</p>
                 </CardBody>
               </Card>
             </>
