@@ -18,7 +18,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
     setSelectedGenres(value);
   };
 
-  const postUserSelection = async (selectedGenres) => {
+  const postUserSelection = async (selectedGenres: string[]) => {
     console.log('test')
     const apiUrl = 'http://127.0.0.1:5000/api/store/profile'; 
   
@@ -66,7 +66,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
         const checkboxValues = ["action", "adventure", "animation", "biography", "comedy", "crime", "documentary", "drama", "fantasy", "film_noir", "history", "horror", "music", "musical", "mystery", "romance", "sci_fi", "sport", "thriller", "war", "western", "foreign"];
         
         // Extract the boolean values (positions 1 to 22) and map them to the checkbox values
-        const genres = data[0].slice(1, 23).flatMap((value, index) => value ? checkboxValues[index] : []);
+        const genres = data[0].slice(1, 23).flatMap((value: boolean, index: number) => value ? checkboxValues[index] : []);
 
         setSelectedGenres(genres)
 
@@ -124,7 +124,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           <CheckboxGroup
             label="Tell me what you like!"
             defaultValue={selectedGenres}
-            onChange={handleCheckboxChange}
+            onChange={handleCheckboxChange as any}
           >
             <Checkbox value="action">Action</Checkbox>
             <Checkbox value="adventure">Adventure</Checkbox>

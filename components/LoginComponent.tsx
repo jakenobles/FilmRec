@@ -42,7 +42,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess, setGlob
       setGlobalUsername(username);
       const isNewUser = !isLoginMode;
       onLoginSuccess(isNewUser);
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message);
     }
   };
