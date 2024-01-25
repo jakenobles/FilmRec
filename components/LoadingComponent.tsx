@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Spinner } from "@nextui-org/react";
 
 interface LoadingComponentProps {
-  username: string; 
+  username: string;
 }
 
 const LoadingComponent: React.FC<LoadingComponentProps> = ({ username }) => {
+
   return (
     <div className='min-h-screen flex flex-col items-center justify-center font-sans px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 scrollbar-hide'>
       <nav className="w-full flex justify-center items-center">

@@ -36,7 +36,15 @@ def register_user():
    query_insert = "INSERT INTO user_data (username, password) VALUES (%s, %s)"
    try:
         DB.execute_db_insert(query_insert, (username, Login.hash_password(password)))
-        return jsonify({"message": "Registration successful"}), 200
+        
+        # User registered, now create a session ID (JWT token) for the new user
+        access_token = create_access_token(identity=username)
+        response = jsonify({"message": "Registration successful", "logged_in_as": username})
+        
+        # Set the JWT token in cookies
+        set_access_cookies(response, access_token)
+        
+        return response, 200
    except Exception as e:
         #Handle specific exceptions as needed
         return jsonify({"error": "An error occurred during registration"}), 500
@@ -137,6 +145,33 @@ def store_genre():
 def add_watched():
     data = request.json
 
+    upsert_query = """
+        INSERT INTO watched_movies (username, movie_id, movie_title, favorite) 
+        VALUES (%s, %s, %s, %s) 
+        ON CONFLICT (username, movie_id) DO UPDATE 
+        SET movie_title = EXCLUDED.movie_title, favorite = EXCLUDED.favorite;
+    """
+
+    if data['favorite'] == 1:
+        is_favorite = True
+    else:
+        is_favorite = False
+
+    try:
+        # Inserts new movie or updates if it already exists
+        DB.execute_db_insert(upsert_query, (data['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
+
+        return jsonify({'message': 'Movie stored successfully'}), 200
+    
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+    
+#Adds single watched movie
+@app.route('/api/store/singlewatched', methods=['POST'])
+def add_single_watched():
+    data = request.json
+
     insert_query = "INSERT INTO watched_movies (username, movie_id, movie_title, favorite) VALUES (%s, %s, %s, %s);"
 
     if data['favorite'] == 1:
@@ -145,11 +180,11 @@ def add_watched():
         is_favorite = False
 
     try:
-        #Inserts new profile
-        DB.execute_db_insert(insert_query, (data['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
+        #Inserts single movie
+        DB.execute_db_insert(insert_query, (data['movie']['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
 
         return jsonify({'message': 'Profile stored successfully'}), 200
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
@@ -161,14 +196,15 @@ def get_recommendation():
 
     watched_list_query = 'SELECT * FROM watched_movies WHERE username = %s'
 
+    dnr_query = 'SELECT * FROM do_not_recommend WHERE username = %s'
+
     try:
         user_genres = DB.execute_db_query(genre_query, (data['username'], ))
         watched_list = DB.execute_db_query(watched_list_query, (data['username'], ))
+        do_not_recommend_list = DB.execute_db_query(dnr_query, (data['username'], ))
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
-    print("test! " + str(user_genres))
     
     prompt_genres = Chat.process_genres(user_genres)[0]
 
@@ -176,15 +212,69 @@ def get_recommendation():
     
     watched_movies = Chat.process_watched(watched_list)
 
-    prompt = f"User Genre Likes: {prompt_genres}. {ok_with_foreign} Watched and Liked Movies: {watched_movies}"
+    dnr = Chat.process_DNR(do_not_recommend_list)
+
+    prompt = f"User Genre Likes: {prompt_genres}. {ok_with_foreign} Watched and Liked Movies: {watched_movies}. Do not recommend: {dnr}"
 
     recommendation = Chat.chat_gpt(prompt)
 
-    response = Chat.process_recommendation(recommendation)
-
-    print(response)
+    response = Chat.process_recommendation(recommendation, data['username'])
 
     return response, 200
+
+#Returns user's preference profile.
+@app.route('/api/fetch/profile', methods=['GET'])
+@jwt_required(optional=True)
+def get_user_profile():
+    current_user = get_jwt_identity()
+
+    if current_user:
+        query = 'SELECT * FROM preferences WHERE username = %s'
+
+        response = DB.execute_db_query(query, (current_user, ))
+
+        return jsonify(response), 200
+    else:
+        return jsonify({'error' : 'No data for user'}), 401
+
+#Returns user's watch list    
+@app.route('/api/fetch/watched', methods=['GET'])
+@jwt_required(optional=True)
+def get_user_watched():
+    current_user = get_jwt_identity()
+
+    if current_user:
+        query = 'SELECT * FROM watched_movies WHERE username = %s'
+
+        response = DB.execute_db_query(query, (current_user, ))
+
+        movie_data_list = []
+        
+        #Getting TMDB data for each movie in user watched list.
+        for movie in response:
+            movie_data = Chat.get_movie_details(movie[2])
+            movie_data_list.append(movie_data)
+        
+        return jsonify(movie_data_list), 200
+    else:
+        return jsonify({'error' : 'No data for user'}), 401
+    
+#Do not recommend list
+@app.route('/api/store/dnr', methods=['POST'])
+def store_dnr():
+    data = request.json
+
+    if data:
+        query = 'INSERT INTO do_not_recommend (username, original_title) VALUES (%s, %s);'
+
+        response = DB.execute_db_insert(query, (data['movie']['username'], data['movie']['title']))
+
+        return jsonify(response), 200
+    
+    else:
+        return jsonify({'error' : 'No data for user'}), 401
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

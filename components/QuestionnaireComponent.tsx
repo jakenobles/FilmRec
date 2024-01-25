@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import {CheckboxGroup, Checkbox} from "@nextui-org/react";
 import {Button} from "@nextui-org/button"
+import { Spinner } from "@nextui-org/react"
 
 interface QuestionnaireComponentProps {
   onComplete: () => void;
@@ -10,6 +11,8 @@ interface QuestionnaireComponentProps {
 
 const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onComplete, username }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
 
   const handleCheckboxChange = (value: string[]) => {
     setSelectedGenres(value);
@@ -41,6 +44,46 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
       console.error('Error submitting user selection:', error);
     }
   };
+
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000//api/fetch/profile`, {
+          method: 'GET',
+          credentials: 'include', // Necessary for cookies
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // List of checkbox values in the same order as they appear in the data array
+        const checkboxValues = ["action", "adventure", "animation", "biography", "comedy", "crime", "documentary", "drama", "fantasy", "film_noir", "history", "horror", "music", "musical", "mystery", "romance", "sci_fi", "sport", "thriller", "war", "western", "foreign"];
+        
+        // Extract the boolean values (positions 1 to 22) and map them to the checkbox values
+        const genres = data[0].slice(1, 23).flatMap((value, index) => value ? checkboxValues[index] : []);
+
+        setSelectedGenres(genres)
+
+        if (data.genres) {
+          console.log('TESTQC')
+          setSelectedGenres(data.genres);
+        }
+      } catch (error) {
+        
+        console.error('Error fetching user preferences:', error);
+      } finally {
+        setIsLoading(false); // Finish loading
+      }
+    };
+
+    fetchUserPreferences();
+  }, []);
   
   // Usage in the handleSubmit function
   const handleSubmit = () => {
@@ -56,6 +99,19 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
       });
   };
 
+  if (isLoading) {
+    return  (
+            <div className='min-h-screen flex flex-col items-center justify-center font-sans px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 scrollbar-hide'>
+              <nav className="w-full flex justify-center items-center">
+                <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12" />
+              </nav>
+              <h1 className='text-3xl mb-4'>Hi {username}!</h1>
+              <p className='text-xl mb-4'>Please wait while we load your questionnaire!</p>
+              <Spinner size="lg" />
+            </div>
+            )
+  }
+
   return (
     <div className='min-h-screen flex flex-col items-center justify-center font-sans px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 scrollbar-hide'>
       <nav className="w-full flex justify-center items-center">
@@ -67,7 +123,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           <CardBody className='scrollbar-hide'>
           <CheckboxGroup
             label="Tell me what you like!"
-            defaultValue={[]}
+            defaultValue={selectedGenres}
             onChange={handleCheckboxChange}
           >
             <Checkbox value="action">Action</Checkbox>

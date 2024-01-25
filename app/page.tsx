@@ -10,11 +10,10 @@ import LoadingComponent from '../components/LoadingComponent';
 //Main Function
 const Home: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [showQuestionnaire, setShowQuestionnaire] = useState<boolean>(false);
+  const [isNewUser, setIsNewUser] = useState<boolean>(false);
+  const [currentStep, setCurrentStep] = useState<string>('login');
   const [username, setUsername] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [movieList, setMovieList] = useState<string[]>([]);
-  const [recommendation, setRecommendation] = useState<string | null>(null);
+  const [recommendation, setRecommendation] = useState<string | any>(null);
 
   //Checks if there is a valid session ID on load
   useEffect(() => {
@@ -28,7 +27,8 @@ const Home: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setUsername(data.username)
-          setIsLoggedIn(true);
+          setIsLoggedIn(true)
+          setCurrentStep('loading');
         }
       } catch (error) {
         console.error('Session check failed:', error);
@@ -38,23 +38,10 @@ const Home: React.FC = () => {
     checkSession();
   }, []);
 
-  //Checks if there is a valid session ID on load
-  useEffect(() => {
-    const loggedIn = async () => {
-      setIsLoading(true);
-      handleMovieListSubmit(username);
-      setShowQuestionnaire(true)
-    };
-
-    loggedIn();
-  }, [username]);
   
-
-
   //Submits the movie list to Flask to then create a recommendation
   const handleMovieListSubmit = async (userName : string) => {
-    setIsLoading(true);
-    console.log(username + " IN HANDLE ML")
+    console.log(userName + " IN HANDLE ML")
   
     const url = 'http://127.0.0.1:5000/api/recommendation'; 
   
@@ -74,35 +61,72 @@ const Home: React.FC = () => {
       console.error('Error:', error);
       // Handle error appropriately
     } finally {
-      setIsLoading(false);
+      setCurrentStep('recommendation')
     }
+  };
+
+  const handleRecommendButton = () => {
+    setCurrentStep('loading')
+  }
+
+  //Triggers when currentstep is loading, starts recommendation
+  useEffect(() => {
+    if (currentStep === 'loading') {
+      handleMovieListSubmit(username);
+    }
+    // This useEffect will trigger whenever currentStep changes to 'loading'
+  }, [currentStep, username, handleMovieListSubmit]);
+
+  //Handles questionnaire completion and goes to movie list
+  const handleQuestionnaireComplete = () => {
+    setCurrentStep('movielist')
+  }
+
+  const setShowQuestionnaire = (step) => {
+    setCurrentStep(step);
+  };
+
+  const handleAlreadyWatched = () => {
+    setCurrentStep('loading')
   };
 
   //Handles the session if user logs out
   const handleLogout = () => {
     setIsLoggedIn(false)
+    setCurrentStep('login')
+  };
+
+  const renderComponent = () => {
+    switch (currentStep) {
+      case 'login':
+        return <LoginComponent onLoginSuccess={handleLogin} setGlobalUsername={setUsername}/>;
+      case 'questionnaire':
+        return <QuestionnaireComponent onComplete={handleQuestionnaireComplete} username={username}/>;
+      case 'movielist':
+        return <MovieListComponent onSubmit={handleRecommendButton} setShowQuestionnaire={setShowQuestionnaire} username={username} />
+      case 'recommendation':
+        return <RecommendationComponent recommendation={recommendation} onEditPreferences={handleEditPreferences} onAlreadyWatched={handleAlreadyWatched} onLogout={handleLogout}/>;
+      case 'loading':
+        return <LoadingComponent username={username} />;
+      default:
+        return <LoginComponent onLoginSuccess={handleLogin} setGlobalUsername={setUsername}/>;
+    }
+  };
+
+  const handleLogin = (isNewUser: boolean) => {
+    setIsLoggedIn(true);
+    setIsNewUser(isNewUser)
+    setCurrentStep(isNewUser ? 'questionnaire' : 'loading')
+  };
+
+  const handleEditPreferences = () => {
+    setCurrentStep('questionnaire');
   };
 
 
   return (
     <div className="container mx-auto min-h-screen">
-      {isLoading ? (
-        <LoadingComponent username={username} />
-      ) : isLoggedIn ? (
-        <>
-          {showQuestionnaire ? (
-            !recommendation ? (
-              <MovieListComponent onSubmit={handleMovieListSubmit} setShowQuestionnaire={setShowQuestionnaire} username={username} />
-            ) : (
-              <RecommendationComponent recommendation={recommendation} />
-            )
-          ) : (
-            <QuestionnaireComponent onComplete={() => setShowQuestionnaire(true)} username={username} />
-          )}
-        </>
-      ) : (
-        <LoginComponent onLoginSuccess={() => setIsLoggedIn(true)} setGlobalUsername={setUsername} />
-      )}
+      {renderComponent()}
     </div>
   );
 };

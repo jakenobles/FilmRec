@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {Image} from "@nextui-org/image";
 import {Card, CardBody, CardHeader} from "@nextui-org/react";
-import NextImage from "next/image";
 import {Button} from "@nextui-org/button"
 
 interface RecommendationComponentProps {
@@ -10,11 +9,86 @@ interface RecommendationComponentProps {
     year: number;
     id: number;
     reason: string;
-    // Add other properties if necessary
   };
+
+  onEditPreferences: () => void;
+  onAlreadyWatched: () => void;
+  onLogout: () => void;
 }
 
-const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation }) => {
+const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation, onEditPreferences, onAlreadyWatched, onLogout }) => {
+
+  //Sends user's favorite movies to my database
+  const watched_already = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/store/singlewatched', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: 
+        JSON.stringify({ movie : recommendation, favorite : 1}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log("All movies submitted successfully");
+    } catch (error) {
+      console.error("Error submitting movies: ", error);
+    } finally {
+      onAlreadyWatched();
+    }
+  };
+
+  //Sends user's favorite movies to my database
+  const do_not_recommend = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/store/dnr', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: 
+        JSON.stringify({ movie : recommendation }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log("All movies submitted successfully");
+    } catch (error) {
+      console.error("Error submitting movies: ", error);
+    } finally {
+      onAlreadyWatched();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/logout', {
+        method: 'POST',
+        credentials: 'include', // Ensure cookies are sent with the request if using session-based authentication
+      });
+
+      if (!response.ok) {
+        throw new Error(`Logout failed with status: ${response.status}`);
+      }
+
+      console.log("Logout successful");
+
+      onLogout();
+
+    } catch (error) {
+      console.error("Error during logout: ", error);
+    }
+  };
+
+
   
     return (
       <section className="flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
@@ -48,12 +122,14 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
             </>
           )}
           <div className='flex flex-row justify-center items-center'>
-            <Button color='primary' variant='bordered' className='mt-4 mr-2'>Add to Watched</Button>
-            <Button color='primary' variant='bordered' className='mt-4 ml-2'>Reroll</Button>
+            <Button onClick={watched_already} color='primary' variant='bordered' className='mt-4 mr-2'>I've seen this!</Button>
+            <Button onClick={do_not_recommend} color='primary' variant='bordered' className='mt-4 ml-2'>Do Not Recommend</Button>
           </div>
           <div className='flex flex-row justify-center items-center'>
-            <Button color='primary' variant='bordered' className='mt-4 mr-2'>Edit Preferences</Button>
-            <Button color='primary' variant='bordered' className='mt-4 ml-2'>Edit Watched List</Button>
+            <Button onClick={onEditPreferences} color='primary' variant='bordered' className='mt-4 mr-2'>Edit Preferences and Watched List</Button>
+          </div>
+          <div className='flex flex-row justify-center items-center'>
+            <Button onClick={handleLogout} color='danger' variant='bordered' className='mt-4 mr-2'>Logout</Button>
           </div>
         </div>
       </section>

@@ -19,12 +19,14 @@ class Chat:
             'year': Indicate the year of release of the movie.
             'id': This refers to the movie's The Movie Database (TMDB) identification number. It is crucial that this ID is exact and corresponds to the recommended movie.
             'reason': Provide a succinct yet engaging explanation tailored to the user's preferences, explaining why this particular movie is a suitable recommendation. This should read naturally and conversationally.
+            'og_title': If the movie's title is not in english, include that untranslated version here, otherwise value it "null".
 
         IMPORTANT INSTRUCTIONS:
 
             Consistency Check: Ensure that the movie title referred to in the 'reason' section is exactly the same as the movie title listed under the 'title' key. They must match word-for-word.
             TMDB ID Verification: The TMDB id provided must be cross-checked to confirm it corresponds directly to the recommended movie. This is to ensure that there are no errors in movie identification. Ensuring you have the correct movie ID is the most important part of the process.
             Avoiding Repetition: Cross-reference the user's watched list to guarantee that the recommended movie is not one the user has already seen.
+            Do Not Recommend: Ensure that you do not include any movies that are within the user's Do Not Recommend list.
             Implicit Reasoning: In the 'reason' section, avoid explicitly stating the user's preferences. Instead, weave these preferences into the recommendation in a way that feels natural and unforced. For instance, if recommending a foreign film, do not simply state 'because you like foreign films', but rather highlight specific elements of the film that align with the user's tastes.
 
         This detailed approach is designed to optimize the relevance and accuracy of the movie recommendation, ensuring that it is both personalized and precise. Carefully follow these guidelines to deliver a recommendation that is perfectly tailored to the user's unique profile."""},
@@ -89,13 +91,38 @@ class Chat:
     return watched_movies
   
   @staticmethod
-  def process_recommendation(recommendation):
+  def process_recommendation(recommendation, username):
     rec_dict = json.loads(recommendation)
 
-    movie_data = Chat.get_movie_details(rec_dict['id'])
+    rec_dict['username'] = username
+
+    query = 'SELECT id FROM tmdb WHERE original_title = %s ORDER BY popularity DESC LIMIT 1'
+
+    if rec_dict['og_title'] != "null" and rec_dict['og_title'] is not None and rec_dict['og_title'] != "None":
+        param = rec_dict['og_title']
+    else:
+        param = rec_dict['title']
+
+    movie_id = DB.execute_db_query(query, (param, ))
+
+    if movie_id != []:
+      extract_movie_id = movie_id[0][0]
+      movie_data = Chat.get_movie_details(extract_movie_id)
+    else:
+      movie_data = Chat.get_movie_details(rec_dict['id'])
 
     return_json = {**rec_dict, **movie_data}
 
     return_json_string = json.dumps(return_json)
     
     return return_json_string
+  
+  @staticmethod
+  def process_DNR(do_not_recommend_list):
+    print(do_not_recommend_list)
+    dnr_list_string = ""
+    
+    for movie in do_not_recommend_list:
+      dnr_list_string += f"{movie[1] }"
+      
+    return dnr_list_string

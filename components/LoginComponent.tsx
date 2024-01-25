@@ -5,8 +5,8 @@ import {Input} from "@nextui-org/react";
 import {Button} from "@nextui-org/react";
 
 interface LoginComponentProps {
-  onLoginSuccess: () => void;
-  setGlobalUsername: (username: string) => void; // New prop for updating the global username
+  onLoginSuccess: (isNewUser: boolean) => void;
+  setGlobalUsername: (username: string) => void;
 }
 
 //Logs in the user and retrieves cookies for sessions.
@@ -40,7 +40,8 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess, setGlob
 
       const data = await response.json();
       setGlobalUsername(username);
-      onLoginSuccess();
+      const isNewUser = !isLoginMode;
+      onLoginSuccess(isNewUser);
     } catch (error) {
       setError(error.message);
     }

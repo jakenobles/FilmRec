@@ -3,15 +3,14 @@ import {Card, CardBody, CardHeader} from "@nextui-org/react";
 import {Input} from "@nextui-org/react";
 import {Image} from "@nextui-org/image";
 import {Button} from "@nextui-org/button"
+import { Spinner } from "@nextui-org/react"
 
 
 interface MovieListComponentProps {
-  onSubmit: (movieList: string[]) => void;
-  setShowQuestionnaire: (show: boolean) => void;
+  onSubmit: (username: string) => void;
+  setShowQuestionnaire: (show: string) => void;
   username: string;
 }
-
-
 
 //Limits the amount of calls to API
 const debounce = (func, delay) => {
@@ -28,6 +27,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMovies, setSelectedMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const apiKey = '4ee9a5dacc826d31306e4b2a903d1833';
 
@@ -55,7 +55,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   
   const handleSubmit = () => {
     // Implement movie list submission logic
-    onSubmit(selectedMovies);
+    onSubmit(username);
   };
 
   const addMovieToList = (movie) => {
@@ -97,10 +97,40 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     }
   };
 
+  useEffect(() => {
+    const fetchUserWatched = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000//api/fetch/watched`, {
+          method: 'GET',
+          credentials: 'include', // Necessary for cookies
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setSelectedMovies(data)
+
+      } catch (error) {
+        
+        console.error('Error fetching user watched:', error);
+      } finally {
+        setIsLoading(false); // Finish loading
+      }
+    };
+
+    fetchUserWatched();
+  }, []);
+
   // Handler for "Go Back" button click
   const handleBack = () => {
     // Call the callback function to set setShowQuestionaire to true
-    setShowQuestionnaire(false);
+    setShowQuestionnaire('questionnaire');
   };
 
   const MovieCard = ({ movie }) => {
@@ -127,9 +157,22 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
       </div>
     );
   };
-  
-   
 
+
+  //Loads until user's movies load from database
+  if (isLoading) {
+    return  (
+            <div className='min-h-screen flex flex-col items-center justify-center font-sans px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 scrollbar-hide'>
+              <nav className="w-full flex justify-center items-center">
+                <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12" />
+              </nav>
+              <h1 className='text-3xl mb-4'>Hi {username}!</h1>
+              <p className='text-xl mb-4'>Please wait while we load your watched list!</p>
+              <Spinner size="lg" />
+            </div>
+            )
+  }
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
       <nav className="w-full flex justify-center items-center">

@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import json
 
 #Environment Variables
 # Database connection parameters should be in environment variables or a config file
@@ -20,6 +21,7 @@ cur = conn.cursor()
 # Drop all tables if exist
 cur.execute('DROP TABLE IF EXISTS preferences;')
 cur.execute('DROP TABLE IF EXISTS watched_movies;')
+cur.execute('DROP TABLE IF EXISTS do_not_recommend')
 cur.execute('DROP TABLE IF EXISTS user_data;')
 cur.execute('DROP TABLE IF EXISTS time_period')
 
@@ -71,14 +73,40 @@ cur.execute('''
                 username VARCHAR(255) REFERENCES user_data(username),
                 movie_id VARCHAR(255) NOT NULL,
                 movie_title VARCHAR(255) NOT NULL,
-                favorite BOOLEAN NOT NULL
+                favorite BOOLEAN NOT NULL,
+                UNIQUE(username, movie_id)
             );
             ''')
+#Creation of the do not recommend table
+cur.execute('''
+            CREATE TABLE do_not_recommend (
+                username VARCHAR(255) NOT NULL,
+                original_title VARCHAR(255) NOT NULL,
+                CONSTRAINT fk_username FOREIGN KEY (username) REFERENCES user_data(username),
+                CONSTRAINT pk_do_not_recommend PRIMARY KEY (username, original_title)
+            );
+''')
+# cur.execute('''
+#             CREATE TABLE tmdb (
+#             adult BOOLEAN NOT NULL,
+#             id INTEGER PRIMARY KEY NOT NULL,
+#             original_title VARCHAR(255) NOT NULL,
+#             popularity DECIMAL NOT NULL,
+#             video BOOLEAN NOT NULL
+#             );    
+#             ''')
 
-<<<<<<< HEAD
+# # Read JSON data
+# with open('fr-flask\movies.json', 'r', encoding='utf-8') as file:
+#     for line in file:
+#         # Parse each line (which is a JSON object) into a Python dictionary
+#         movie = json.loads(line)
 
-=======
->>>>>>> 3fff1a3957a8ee3571367c58009f2aaf5b3ac228
+#         # Construct the INSERT query. Modify table_name and column names as per your database schema.
+#         insert_query = "INSERT INTO tmdb (adult, id, original_title, popularity, video) VALUES (%s, %s, %s, %s, %s)"
+        
+#         # Execute the query with data from the JSON object
+#         cur.execute(insert_query, (movie['adult'], movie['id'], movie['original_title'], movie['popularity'], movie['video']))
 # # Insert test data into the user_data table
 # cur.execute('''INSERT INTO user_data(user_id, username, password)
 #                     VALUES 
