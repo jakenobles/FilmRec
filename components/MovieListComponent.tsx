@@ -12,27 +12,33 @@ interface MovieListComponentProps {
   username: string;
 }
 
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+  release_date: string;
+  // Add any other necessary properties
+}
+
 //Limits the amount of calls to API
-const debounce = (func, delay) => {
-  let inDebounce;
-  return function() {
-    const context = this;
-    const args = arguments;
-    clearTimeout(inDebounce);
-    inDebounce = setTimeout(() => func.apply(context, args), delay);
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let inDebounce: ReturnType<typeof setTimeout> | null;
+  return function(this: any, ...args: any[]) {
+    if (inDebounce) clearTimeout(inDebounce);
+    inDebounce = setTimeout(() => func.apply(this, args), delay);
   };
 };
 
 const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setShowQuestionnaire, username }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedMovies, setSelectedMovies] = useState([]);
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [selectedMovies, setSelectedMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const apiKey = '4ee9a5dacc826d31306e4b2a903d1833';
 
   //Calls API
-  const searchMovies = async (term) => {
+  const searchMovies = async (term: string) => {
     if (!term) {
       setSearchResults([]);
       return;
@@ -49,7 +55,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   }, [searchTerm]);
 
   //Triggers when text in search bar changes
-  const handleSearchChange = (event) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
   
@@ -58,7 +64,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     onSubmit(username);
   };
 
-  const addMovieToList = (movie) => {
+  const addMovieToList = (movie: Movie) => {
     // Check if the movie is already in the list
     if (!selectedMovies.find((m) => m.id === movie.id)) {
       setSelectedMovies([...selectedMovies, movie]);
@@ -67,7 +73,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     }
   };
 
-  const removeMovieFromList = (movieId) => {
+  const removeMovieFromList = (movieId: number) => {
     setSelectedMovies(selectedMovies.filter(movie => movie.id !== movieId));
   };
 
@@ -133,7 +139,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     setShowQuestionnaire('questionnaire');
   };
 
-  const MovieCard = ({ movie }) => {
+  const MovieCard: React.FC<{ movie: Movie }> = ({ movie }) => {
     const posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
 
     return (
@@ -148,7 +154,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     );
   };
 
-  const MovieGrid = ({ movies }) => {
+  const MovieGrid: React.FC<{ movies: Movie[] }> = ({ movies }) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[750px] p-4">
         {movies.map(movie => (

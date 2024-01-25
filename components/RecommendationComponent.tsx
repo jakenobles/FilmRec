@@ -9,6 +9,8 @@ interface RecommendationComponentProps {
     year: number;
     id: number;
     reason: string;
+    poster_path: string; // Add this line
+    overview: string; // Add this line
   };
 
   onEditPreferences: () => void;
@@ -122,7 +124,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
             </>
           )}
           <div className='flex flex-row justify-center items-center'>
-            <Button onClick={watched_already} color='primary' variant='bordered' className='mt-4 mr-2'>I've seen this!</Button>
+            <Button onClick={watched_already} color='primary' variant='bordered' className='mt-4 mr-2'>I&apos;ve seen this!</Button>
             <Button onClick={do_not_recommend} color='primary' variant='bordered' className='mt-4 ml-2'>Do Not Recommend</Button>
           </div>
           <div className='flex flex-row justify-center items-center'>

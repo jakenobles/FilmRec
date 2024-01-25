@@ -164,7 +164,6 @@ def add_watched():
         return jsonify({'message': 'Movie stored successfully'}), 200
     
     except Exception as e:
-        print(e)
         return jsonify({'error': str(e)}), 500
     
 #Adds single watched movie

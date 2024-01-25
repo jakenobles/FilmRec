@@ -1,5 +1,5 @@
 "use client"; // This is a client component
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import LoginComponent from '../components/LoginComponent';
 import QuestionnaireComponent from '../components/QuestionnaireComponent';
 import MovieListComponent from '../components/MovieListComponent';
@@ -39,9 +39,8 @@ const Home: React.FC = () => {
   }, []);
 
   
-  //Submits the movie list to Flask to then create a recommendation
-  const handleMovieListSubmit = async (userName : string) => {
-    console.log(userName + " IN HANDLE ML")
+  const handleMovieListSubmit = async (userName: string) => {
+    console.log(userName + " IN HANDLE ML");
   
     const url = 'http://127.0.0.1:5000/api/recommendation'; 
   
@@ -52,7 +51,7 @@ const Home: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username : userName
+          username: userName
         }),
       });
       const recommendationData = await response.json();
@@ -61,7 +60,7 @@ const Home: React.FC = () => {
       console.error('Error:', error);
       // Handle error appropriately
     } finally {
-      setCurrentStep('recommendation')
+      setCurrentStep('recommendation');
     }
   };
 
@@ -82,7 +81,7 @@ const Home: React.FC = () => {
     setCurrentStep('movielist')
   }
 
-  const setShowQuestionnaire = (step) => {
+  const setShowQuestionnaire = (step: string) => {
     setCurrentStep(step);
   };
 
