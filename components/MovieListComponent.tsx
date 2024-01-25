@@ -35,7 +35,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const [selectedMovies, setSelectedMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const apiKey = '4ee9a5dacc826d31306e4b2a903d1833';
+  const apiKey = process.env.NEXT_PUBLIC_REACT_APP_TMDB_API_KEY;
 
   //Calls API
   const searchMovies = async (term: string) => {
