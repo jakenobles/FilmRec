@@ -4,8 +4,7 @@ from flask_cors import CORS
 from db import DB
 from login import Login
 from chat import Chat
-import json
-import os
+
 
 #Starting the Flask app
 app = Flask(__name__)

@@ -98,7 +98,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const submitMovies = async () => {
     try {
       for (const movie of selectedMovies) {
-        const response = await fetch('http://127.0.0.1:5000/api/store/watched', {
+        const response = await fetch('http://fr-flask:5000/api/store/watched', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   useEffect(() => {
     const fetchUserWatched = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000//api/fetch/watched`, {
+        const response = await fetch(`http://fr-flask:5000//api/fetch/watched`, {
           method: 'GET',
           credentials: 'include', // Necessary for cookies
           headers: {

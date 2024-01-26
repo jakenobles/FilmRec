@@ -24,7 +24,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
   //Sends user's favorite movies to my database
   const watched_already = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/store/singlewatched', {
+      const response = await fetch('http://fr-flask:5000/api/store/singlewatched', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -50,7 +50,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
   //Sends user's favorite movies to my database
   const do_not_recommend = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/store/dnr', {
+      const response = await fetch('http://fr-flask:5000/api/store/dnr', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -75,7 +75,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/logout', {
+      const response = await fetch('http://fr-flask:5000/logout', {
         method: 'POST',
         credentials: 'include', // Ensure cookies are sent with the request if using session-based authentication
       });

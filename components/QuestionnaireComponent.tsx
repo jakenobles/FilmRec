@@ -21,7 +21,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
 
   const postUserSelection = async (selectedGenres: string[]) => {
     console.log('test')
-    const apiUrl = 'http://127.0.0.1:5000/api/store/profile'; 
+    const apiUrl = 'http://fr-flask:5000/api/store/profile'; 
   
     try {
       const response = await fetch(apiUrl, {
@@ -54,7 +54,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
   useEffect(() => {
     const fetchUserPreferences = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000//api/fetch/profile`, {
+        const response = await fetch(`http://fr-flask:5000//api/fetch/profile`, {
           method: 'GET',
           credentials: 'include', // Necessary for cookies
           headers: {

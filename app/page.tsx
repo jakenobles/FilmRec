@@ -19,7 +19,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5000/check-session', {
+        const response = await fetch('http://fr-flask:5000/check-session', {
           method: 'GET',
           credentials: 'include', // Necessary for cookies
         });
@@ -42,7 +42,7 @@ const Home: React.FC = () => {
   const handleMovieListSubmit = async (userName: string) => {
     console.log(userName + " IN HANDLE ML");
   
-    const url = 'http://127.0.0.1:5000/api/recommendation'; 
+    const url = 'http://fr-flask:5000/api/recommendation'; 
   
     try {
       const response = await fetch(url, {
