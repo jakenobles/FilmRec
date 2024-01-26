@@ -12,6 +12,7 @@ interface QuestionnaireComponentProps {
 const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onComplete, username }) => {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
 
   const handleCheckboxChange = (value: string[]) => {
@@ -33,15 +34,20 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           genres: selectedGenres
         }),
       });
+
+      const data = await response.json();
   
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        // Use the error message from your server response
+        const errorMessage = data.error || `Error: ${response.status} ${response.statusText}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
   
-      const data = await response.json();
       return data; // You can also handle the response data as needed
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting user selection:', error);
+      setError(typeof error === 'string' ? error : error.message);
     }
   };
 
@@ -74,8 +80,8 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           console.log('TESTQC')
           setSelectedGenres(data.genres);
         }
-      } catch (error) {
-        
+      } catch (error: any) {
+        setError(typeof error === 'string' ? error : error.message);
         console.error('Error fetching user preferences:', error);
       } finally {
         setIsLoading(false); // Finish loading
@@ -94,7 +100,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
         onComplete();
       })
       .catch(error => {
-        // Handle errors
+        setError(typeof error === 'string' ? error : error.message);
         console.error('Submission failed', error);
       });
   };
@@ -121,34 +127,39 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
       <div className='flex flex-col items-center w-full sm:w-3/4 md:w-1/2 scrollbar-hide'>
         <Card className='w-full sm:w-2/3 md:w-1/2 scrollbar-hide'>
           <CardBody className='scrollbar-hide'>
-          <CheckboxGroup
-            label="Tell me what you like!"
-            defaultValue={selectedGenres}
-            onChange={handleCheckboxChange as any}
-          >
-            <Checkbox value="action">Action</Checkbox>
-            <Checkbox value="adventure">Adventure</Checkbox>
-            <Checkbox value="animation">Animation</Checkbox>
-            <Checkbox value="biography">Biography</Checkbox>
-            <Checkbox value="comedy">Comedy</Checkbox>
-            <Checkbox value="crime">Crime</Checkbox>
-            <Checkbox value="documentary">Documentary</Checkbox>
-            <Checkbox value="drama">Drama</Checkbox>
-            <Checkbox value="fantasy">Fantasy</Checkbox>
-            <Checkbox value="film_noir">Film Noir</Checkbox>
-            <Checkbox value="history">History</Checkbox>
-            <Checkbox value="horror">Horror</Checkbox>
-            <Checkbox value="music">Music</Checkbox>
-            <Checkbox value="musical">Musical</Checkbox>
-            <Checkbox value="mystery">Mystery</Checkbox>
-            <Checkbox value="romance">Romance</Checkbox>
-            <Checkbox value="sci_fi">Sci-Fi</Checkbox>
-            <Checkbox value="sport">Sport</Checkbox>
-            <Checkbox value="thriller">Thriller</Checkbox>
-            <Checkbox value="war">War</Checkbox>
-            <Checkbox value="western">Western</Checkbox>
-            <Checkbox value="foreign">Foreign</Checkbox>
-          </CheckboxGroup>
+            {error && (
+                <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {error}
+                </div>
+            )}
+            <CheckboxGroup
+              label="Tell me what you like!"
+              defaultValue={selectedGenres}
+              onChange={handleCheckboxChange as any}
+            >
+              <Checkbox value="action">Action</Checkbox>
+              <Checkbox value="adventure">Adventure</Checkbox>
+              <Checkbox value="animation">Animation</Checkbox>
+              <Checkbox value="biography">Biography</Checkbox>
+              <Checkbox value="comedy">Comedy</Checkbox>
+              <Checkbox value="crime">Crime</Checkbox>
+              <Checkbox value="documentary">Documentary</Checkbox>
+              <Checkbox value="drama">Drama</Checkbox>
+              <Checkbox value="fantasy">Fantasy</Checkbox>
+              <Checkbox value="film_noir">Film Noir</Checkbox>
+              <Checkbox value="history">History</Checkbox>
+              <Checkbox value="horror">Horror</Checkbox>
+              <Checkbox value="music">Music</Checkbox>
+              <Checkbox value="musical">Musical</Checkbox>
+              <Checkbox value="mystery">Mystery</Checkbox>
+              <Checkbox value="romance">Romance</Checkbox>
+              <Checkbox value="sci_fi">Sci-Fi</Checkbox>
+              <Checkbox value="sport">Sport</Checkbox>
+              <Checkbox value="thriller">Thriller</Checkbox>
+              <Checkbox value="war">War</Checkbox>
+              <Checkbox value="western">Western</Checkbox>
+              <Checkbox value="foreign">Foreign</Checkbox>
+            </CheckboxGroup>
           </CardBody>
         </Card>
         <Button onClick={handleSubmit} color='primary' variant='bordered' className='mt-4 w-1/3'>Submit</Button>

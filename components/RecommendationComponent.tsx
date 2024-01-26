@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {Image} from "@nextui-org/image";
 import {Card, CardBody, CardHeader} from "@nextui-org/react";
 import {Button} from "@nextui-org/button"
@@ -19,6 +19,7 @@ interface RecommendationComponentProps {
 }
 
 const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recommendation, onEditPreferences, onAlreadyWatched, onLogout }) => {
+  const [error, setError] = useState('');
 
   //Sends user's favorite movies to my database
   const watched_already = async () => {
@@ -38,8 +39,9 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
       }
 
       console.log("All movies submitted successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting movies: ", error);
+      setError(typeof error === 'string' ? error : error.message);
     } finally {
       onAlreadyWatched();
     }
@@ -63,7 +65,8 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
       }
 
       console.log("All movies submitted successfully");
-    } catch (error) {
+    } catch (error: any) {
+      setError(typeof error === 'string' ? error : error.message);
       console.error("Error submitting movies: ", error);
     } finally {
       onAlreadyWatched();
@@ -85,7 +88,8 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
 
       onLogout();
 
-    } catch (error) {
+    } catch (error: any) {
+      setError(typeof error === 'string' ? error : error.message);
       console.error("Error during logout: ", error);
     }
   };
@@ -93,26 +97,34 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
 
   
     return (
-      <section className="flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
+      <div className="flex flex-col items-center justify-center px-2 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 font-sans">
         <nav className="w-full flex justify-center items-center">
-          <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12 mb-2" />
-        </nav>
-        <div className="flex flex-col items-center justify-content-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
-          {recommendation && (
-            <>
-              <Image
-                width={300}
-                src={`https://image.tmdb.org/t/p/w500${recommendation.poster_path}`}
-                alt={recommendation.title}
-              />
-              <h1 className="text-center mt-2 mb-2 text-2xl">
-                <strong>{recommendation.title}</strong> ({recommendation.year})
-              </h1>
+        <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12 mb-2" />
+      </nav>
+        {error && (
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+        )} 
+        {recommendation && (
+          <>
+            <Image
+              width={300}
+              src={`https://image.tmdb.org/t/p/w500${recommendation.poster_path}`}
+              alt={recommendation.title}
+              className=''
+            />
+            <h1 className="text-center mt-2 mb-2 text-2xl">
+              <strong>{recommendation.title}</strong> ({recommendation.year})
+            </h1>
+            <div className=''>
               <Card className="mt-2">
                 <CardBody className='max-w-prose'>
                   <p className="text-center italic">{recommendation.reason}</p>
                 </CardBody>
               </Card>
+            </div>
+            <div className=''>
               <Card className="mt-2 mb-0 max-w-prose">
                 <CardHeader className="font-bold">
                   <h1>Description</h1>
@@ -121,20 +133,26 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
                   <p className="">{recommendation.overview}</p>
                 </CardBody>
               </Card>
-            </>
-          )}
-          <div className='flex flex-row justify-center items-center'>
-            <Button onClick={watched_already} color='primary' variant='bordered' className='mt-4 mr-2'>I&apos;ve seen this!</Button>
-            <Button onClick={do_not_recommend} color='primary' variant='bordered' className='mt-4 ml-2'>Do Not Recommend</Button>
+            </div>
+          </>
+        )}
+        <div className='px-4'>
+          <div className='flex flex-row justify-center items-center space-x-1'>
+            <div className='flex-1'>
+              <Button onClick={watched_already} color='primary' variant='bordered' className='mt-4 mr-1 w-full sm:w-32'>I&apos;ve seen this!</Button>
+            </div>
+            <div className='flex-1'>
+              <Button onClick={do_not_recommend} color='primary' variant='bordered' className='mt-4 mr-1 w-full sm:w-32'>Don&apos;t Recommend</Button>
+            </div>
           </div>
           <div className='flex flex-row justify-center items-center'>
-            <Button onClick={onEditPreferences} color='primary' variant='bordered' className='mt-4 mr-2'>Edit Preferences and Watched List</Button>
+            <Button onClick={onEditPreferences} color='primary' variant='bordered' className='mt-4'>Edit Preferences and Watched List</Button>
           </div>
           <div className='flex flex-row justify-center items-center'>
-            <Button onClick={handleLogout} color='danger' variant='bordered' className='mt-4 mr-2'>Logout</Button>
+            <Button onClick={handleLogout} color='danger' variant='bordered' className='mt-4'>Logout</Button>
           </div>
         </div>
-      </section>
+      </div>
     );
   };
   

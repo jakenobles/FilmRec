@@ -16,38 +16,34 @@ jwt = JWTManager(app)
 
 CORS(app, supports_credentials=True)
         
-#Registers the user if doesnt exist.    
+#Registers the user if doesnt exist and administers a login token.    
 @app.route('/api/register', methods=['POST'])
 def register_user():
-   data = request.json
-   username = data.get('username')
-   password = data.get('password')
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
 
-   if not username or not password:
+    if not username or not password:
         return jsonify({"error": "Missing username or password"}), 400
-   
-   #Check if user already exists
-   query_check = "SELECT * FROM user_data WHERE username = %s"
-   existing_user = DB.execute_db_query(query_check, (username,))
-   if len(existing_user) > 0:
-        return jsonify({"error": "Username already taken"}), 409
-   
-   #Insert new user
-   query_insert = "INSERT INTO user_data (username, password) VALUES (%s, %s)"
-   try:
+
+    try:
+        query_check = "SELECT * FROM user_data WHERE username = %s"
+        existing_user = DB.execute_db_query(query_check, (username,))
+
+        if existing_user:
+            return jsonify({"error": "Username already taken"}), 409
+
+        query_insert = "INSERT INTO user_data (username, password) VALUES (%s, %s)"
         DB.execute_db_insert(query_insert, (username, Login.hash_password(password)))
-        
-        # User registered, now create a session ID (JWT token) for the new user
+
         access_token = create_access_token(identity=username)
         response = jsonify({"message": "Registration successful", "logged_in_as": username})
-        
-        # Set the JWT token in cookies
         set_access_cookies(response, access_token)
-        
         return response, 200
-   except Exception as e:
-        #Handle specific exceptions as needed
+    except Exception as e:
+        app.logger.error(f'Error during user registration: {e}')
         return jsonify({"error": "An error occurred during registration"}), 500
+
 
 #Logout User
 @app.route('/logout', methods=['POST'])
@@ -56,33 +52,44 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
+#logs in user based on post from app
 @app.route('/api/login', methods=['POST'])
 def login():
-    # Assuming you receive username and password in request
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
+    username = request.json.get('username')
+    password = request.json.get('password')
 
-    # Validate user credentials (you'll need to implement this)
-    user = Login.validate_user(username, password)
-    if user:
-        access_token = create_access_token(identity=username)
-        response = jsonify(logged_in_as=username)
-        set_access_cookies(response, access_token)
-        return response
+    if not username or not password:
+        return jsonify({"error": "Missing username or password"}), 400
 
-    return jsonify({"msg": "Bad username or password"}), 401
+    try:
+        user = Login.validate_user(username, password)
+        if user:
+            access_token = create_access_token(identity=username)
+            response = jsonify(logged_in_as=username)
+            set_access_cookies(response, access_token)
+            return response
+        else:
+            return jsonify({"error": "Invalid username or password"}), 401
+    except Exception as e:
+        app.logger.error(f'Error during login: {e}')
+        return jsonify({"error": "An error occurred during login"}), 500
+
 
 
 #Checks if session is valid   
 @app.route('/check-session', methods=['GET'])
 @jwt_required(optional=True)
 def check_session():
-    current_user = get_jwt_identity()
-    if current_user:
-        user_dict = {'username' : current_user}
-        return jsonify(user_dict), 200
-    else:
-        return jsonify(logged_in=False), 401
+    try:
+        current_user = get_jwt_identity()
+        if current_user:
+            return jsonify({'username': current_user}), 200
+        else:
+            return jsonify({"error": "No active session"}), 401
+    except Exception as e:
+        app.logger.error(f'Error during session check: {e}')
+        return jsonify({"error": "An error occurred checking the session"}), 500
+
     
 #Gets the user's genre profile and stores it
 @app.route('/api/store/profile', methods=['POST'])
@@ -130,20 +137,25 @@ def store_genre():
     insert_query = "INSERT INTO preferences (username, action, adventure, animation, biography, comedy, crime, documentary, drama, fantasy, film_noir, history, horror, music, musical, mystery, romance, sci_fi, sport, thriller, war, western, ok_with_foreign) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
 
     try:
-    #Deletes old profile
         DB.execute_db_insert(delete_query, (data['username'], ))
-
-        #Inserts new profile
-        DB.execute_db_insert(insert_query, (str(data['username']), *genre_values))
-
+        DB.execute_db_insert(insert_query, (data['username'], *genre_values))
         return jsonify({'message': 'Profile stored successfully'}), 200
-    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
+        app.logger.error(f'Error storing user profile: {e}')
+        return jsonify({'error': 'An error occurred storing the profile'}), 500
+
+#Stores user's watched list    
 @app.route('/api/store/watched', methods=['POST'])
 def add_watched():
     data = request.json
+
+    # Input validation
+    if 'username' not in data or 'movie' not in data or 'favorite' not in data:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    username = data['username']
+    movie = data['movie']
+    is_favorite = bool(data['favorite'])
 
     upsert_query = """
         INSERT INTO watched_movies (username, movie_id, movie_title, favorite) 
@@ -152,126 +164,110 @@ def add_watched():
         SET movie_title = EXCLUDED.movie_title, favorite = EXCLUDED.favorite;
     """
 
-    if data['favorite'] == 1:
-        is_favorite = True
-    else:
-        is_favorite = False
-
     try:
-        # Inserts new movie or updates if it already exists
-        DB.execute_db_insert(upsert_query, (data['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
-
+        #inserts and updates movie
+        DB.execute_db_insert(upsert_query, (username, str(movie['id']), movie['original_title'], is_favorite))
         return jsonify({'message': 'Movie stored successfully'}), 200
-    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f'Error storing watched movie: {e}')
+        return jsonify({'error': 'Failed to store the movie'}), 500
+
     
 #Adds single watched movie
 @app.route('/api/store/singlewatched', methods=['POST'])
 def add_single_watched():
     data = request.json
 
+    # Input validation
+    if 'movie' not in data or 'favorite' not in data:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    movie = data['movie']
+    is_favorite = bool(data['favorite'])
+
     insert_query = "INSERT INTO watched_movies (username, movie_id, movie_title, favorite) VALUES (%s, %s, %s, %s);"
 
-    if data['favorite'] == 1:
-        is_favorite = True
-    else:
-        is_favorite = False
-
     try:
-        #Inserts single movie
-        DB.execute_db_insert(insert_query, (data['movie']['username'], str(data['movie']['id']), data['movie']['original_title'], is_favorite))
-
-        return jsonify({'message': 'Profile stored successfully'}), 200
-
+        DB.execute_db_insert(insert_query, (movie['username'], str(movie['id']), movie['original_title'], is_favorite))
+        return jsonify({'message': 'Movie added successfully'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f'Error adding single watched movie: {e}')
+        return jsonify({'error': 'Failed to add the movie'}), 500
+
     
 @app.route('/api/recommendation', methods=['POST'])
 def get_recommendation():
     data = request.json
 
-    genre_query = 'SELECT * FROM preferences WHERE username = %s'
-
-    watched_list_query = 'SELECT * FROM watched_movies WHERE username = %s'
-
-    dnr_query = 'SELECT * FROM do_not_recommend WHERE username = %s'
+    if 'username' not in data:
+        return jsonify({'error': 'Missing username'}), 400
 
     try:
-        user_genres = DB.execute_db_query(genre_query, (data['username'], ))
-        watched_list = DB.execute_db_query(watched_list_query, (data['username'], ))
-        do_not_recommend_list = DB.execute_db_query(dnr_query, (data['username'], ))
-    
+        user_genres = DB.execute_db_query('SELECT * FROM preferences WHERE username = %s', (data['username'], ))
+        watched_list = DB.execute_db_query('SELECT * FROM watched_movies WHERE username = %s', (data['username'], ))
+        do_not_recommend_list = DB.execute_db_query('SELECT * FROM do_not_recommend WHERE username = %s', (data['username'], ))
+
+        prompt_genres, ok_with_foreign = Chat.process_genres(user_genres)
+        watched_movies = Chat.process_watched(watched_list)
+        dnr = Chat.process_DNR(do_not_recommend_list)
+
+        prompt = f"User Genre Likes: {prompt_genres}. {ok_with_foreign} Watched and Liked Movies: {watched_movies}. Do not recommend: {dnr}"
+        recommendation = Chat.chat_gpt(prompt)
+        response = Chat.process_recommendation(recommendation, data['username'])
+
+        return response, 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    prompt_genres = Chat.process_genres(user_genres)[0]
+        app.logger.error(f'Error generating recommendation: {e}')
+        return jsonify({'error': 'Failed to generate recommendation'}), 500
 
-    ok_with_foreign = Chat.process_genres(user_genres)[1]
-    
-    watched_movies = Chat.process_watched(watched_list)
-
-    dnr = Chat.process_DNR(do_not_recommend_list)
-
-    prompt = f"User Genre Likes: {prompt_genres}. {ok_with_foreign} Watched and Liked Movies: {watched_movies}. Do not recommend: {dnr}"
-
-    recommendation = Chat.chat_gpt(prompt)
-
-    response = Chat.process_recommendation(recommendation, data['username'])
-
-    return response, 200
 
 #Returns user's preference profile.
 @app.route('/api/fetch/profile', methods=['GET'])
 @jwt_required(optional=True)
 def get_user_profile():
     current_user = get_jwt_identity()
+    if not current_user:
+        return jsonify({'error': 'Authentication required'}), 401
 
-    if current_user:
-        query = 'SELECT * FROM preferences WHERE username = %s'
-
-        response = DB.execute_db_query(query, (current_user, ))
-
+    try:
+        response = DB.execute_db_query('SELECT * FROM preferences WHERE username = %s', (current_user, ))
         return jsonify(response), 200
-    else:
-        return jsonify({'error' : 'No data for user'}), 401
+    except Exception as e:
+        app.logger.error(f'Error fetching user profile: {e}')
+        return jsonify({'error': 'Failed to fetch user profile'}), 500
 
 #Returns user's watch list    
 @app.route('/api/fetch/watched', methods=['GET'])
 @jwt_required(optional=True)
 def get_user_watched():
     current_user = get_jwt_identity()
+    if not current_user:
+        return jsonify({'error': 'Authentication required'}), 401
 
-    if current_user:
-        query = 'SELECT * FROM watched_movies WHERE username = %s'
-
-        response = DB.execute_db_query(query, (current_user, ))
-
-        movie_data_list = []
-        
-        #Getting TMDB data for each movie in user watched list.
-        for movie in response:
-            movie_data = Chat.get_movie_details(movie[2])
-            movie_data_list.append(movie_data)
-        
+    try:
+        watched_movies = DB.execute_db_query('SELECT * FROM watched_movies WHERE username = %s', (current_user, ))
+        movie_data_list = [Chat.get_movie_details(movie[2]) for movie in watched_movies]  # Assume Chat.get_movie_details() handles its own errors
         return jsonify(movie_data_list), 200
-    else:
-        return jsonify({'error' : 'No data for user'}), 401
+    except Exception as e:
+        app.logger.error(f'Error fetching watched movies: {e}')
+        return jsonify({'error': 'Failed to fetch watched movies'}), 500
     
 #Do not recommend list
 @app.route('/api/store/dnr', methods=['POST'])
 def store_dnr():
     data = request.json
 
-    if data:
-        query = 'INSERT INTO do_not_recommend (username, original_title) VALUES (%s, %s);'
+    if not data or 'movie' not in data:
+        return jsonify({'error': 'Missing required data'}), 400
 
-        response = DB.execute_db_insert(query, (data['movie']['username'], data['movie']['title']))
+    movie = data['movie']
+    try:
+        DB.execute_db_insert('INSERT INTO do_not_recommend (username, original_title) VALUES (%s, %s);', (movie['username'], movie['title']))
+        return jsonify({'message': 'Updated Do Not Recommend list successfully'}), 200
+    except Exception as e:
+        app.logger.error(f'Error updating Do Not Recommend list: {e}')
+        return jsonify({'error': 'Failed to update Do Not Recommend list'}), 500
 
-        return jsonify(response), 200
-    
-    else:
-        return jsonify({'error' : 'No data for user'}), 401
 
 
 

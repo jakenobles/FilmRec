@@ -34,6 +34,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [selectedMovies, setSelectedMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const apiKey = process.env.NEXT_PUBLIC_REACT_APP_TMDB_API_KEY;
 
@@ -43,9 +44,25 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
       setSearchResults([]);
       return;
     }
-    const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(term)}`);
-    const data = await response.json();
-    setSearchResults(data.results.slice(0, 3));
+  
+    try {
+      const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(term)}`);
+  
+      const data = await response.json();
+
+      // Check if the response is successful
+      if (!response.ok) {
+        const errorMessage = data.error || `Error: ${response.status} ${response.statusText}`;
+        setError(errorMessage);
+        throw new Error(`API call failed with status: ${response.status} ${response.statusText}`);
+      }
+  
+      setSearchResults(data.results.slice(0, 3));
+    } catch (error: any) {
+      console.error("Error searching for movies:", error.message);
+      setSearchResults([]);
+      setError(typeof error === 'string' ? error : error.message);
+    }
   };
 
   const debouncedSearchMovies = debounce(searchMovies, 300); // 300ms delay
@@ -97,7 +114,8 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
 
       console.log("All movies submitted successfully");
       handleSubmit()
-    } catch (error) {
+    } catch (error: any) {
+      setError(typeof error === 'string' ? error : error.message);
       console.error("Error submitting movies: ", error);
       // Optionally handle the error, e.g., showing an error message
     }
@@ -114,17 +132,19 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
           },
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
+          const errorMessage = data.error || `Error: ${response.status} ${response.statusText}`;
+          setError(errorMessage);
           throw new Error(`Error: ${response.status}`);
         }
 
-        const data = await response.json();
-
         setSelectedMovies(data)
 
-      } catch (error) {
-        
+      } catch (error: any) {
         console.error('Error fetching user watched:', error);
+        setError(typeof error === 'string' ? error : error.message);
       } finally {
         setIsLoading(false); // Finish loading
       }
@@ -140,8 +160,6 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   };
 
   const MovieCard: React.FC<{ movie: Movie }> = ({ movie }) => {
-    const posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-
     return (
       <div className="flex flex-col items-center justify-center w-full hover:bg-gray-800 p-2 rounded cursor-pointer" onClick={() => removeMovieFromList(movie.id)}>
         <Image
@@ -172,8 +190,8 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
               <nav className="w-full flex justify-center items-center">
                 <img src="/static/images/logo.png" alt="Logo" className="h-10 md:h-12" />
               </nav>
-              <h1 className='text-3xl mb-4'>Hi {username}!</h1>
-              <p className='text-xl mb-4'>Please wait while we load your watched list!</p>
+              <h1 className='text-3xl mb-4 text-center'>Hi {username}!</h1>
+              <p className='text-xl mb-4 text-center'>Please wait while we load your watched list!</p>
               <Spinner size="lg" />
             </div>
             )
@@ -192,6 +210,11 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
           <Input placeholder='Search a movie title' value={searchTerm} onChange={handleSearchChange} />
         </CardHeader>
         <CardBody className='scrollbar-hide'>
+          {error && (
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+              </div>
+          )}
           {searchResults.map(movie => (
            <div key={movie.id} className='flex flex-row mb-2 hover:bg-gray-800 p-2 rounded cursor-pointer' onClick={() => addMovieToList(movie)}>
               <Image

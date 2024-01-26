@@ -34,16 +34,20 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess, setGlob
         credentials: 'include',
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        // Use the error message from your server response
+        const errorMessage = data.error || `Error: ${response.status} ${response.statusText}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
       setGlobalUsername(username);
       const isNewUser = !isLoginMode;
       onLoginSuccess(isNewUser);
     } catch (error: any) {
-      setError(error.message);
+      setError(typeof error === 'string' ? error : error.message);
     }
   };
 
