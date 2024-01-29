@@ -14,9 +14,15 @@
 #### Technologies
 
    * **Frontend**: Next.js for a reactive single page application using NextUI components and styled with Tailwind CSS.
-   * **Backend**: Flask serves as the backend framework, handling API requests and integrating with PostgreSQL as well as interfacing with ChatGPT-4.
+       * Next.js
+       * NextUI
+       * Tailwind CSS
+   * **Backend**: Flask serves as the backend framework, handling API requests, integrating with PostgreSQL, and interfacing with ChatGPT-4.
+       * Flask
    * **Database**: PostgreSQL for robust data storage and retrieval.
+       * PostgreSQL
    * **AI Implementation**: Using OpenAI's ChatGPT-4 to give you the most up to date and accurate recommendations.
+       * OpenAI's ChatGPT-4
 
 ### Contributing
 
