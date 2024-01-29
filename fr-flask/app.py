@@ -4,12 +4,8 @@ from flask_cors import CORS
 from db import DB
 from login import Login
 from chat import Chat
-<<<<<<< HEAD
 from datetime import timedelta
 import os
-=======
-
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
 
 secret_key = os.getenv('JWT_KEY')
 
