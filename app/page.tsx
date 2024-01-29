@@ -19,7 +19,11 @@ const Home: React.FC = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+<<<<<<< HEAD
+        const response = await fetch('https://filmrecapi.midnight-prophet.com/check-session', {
+=======
         const response = await fetch('http://fr-flask:5000/check-session', {
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
           method: 'GET',
           credentials: 'include', // Necessary for cookies
         });
@@ -42,7 +46,11 @@ const Home: React.FC = () => {
   const handleMovieListSubmit = async (userName: string) => {
     console.log(userName + " IN HANDLE ML");
   
+<<<<<<< HEAD
+    const url = 'https://filmrecapi.midnight-prophet.com/api/recommendation'; 
+=======
     const url = 'http://fr-flask:5000/api/recommendation'; 
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
   
     try {
       const response = await fetch(url, {
