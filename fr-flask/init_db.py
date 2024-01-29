@@ -10,10 +10,10 @@ DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
 conn = psycopg2.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD)
+        host='localhost',
+        database='filmrec',
+        user='adminfr',
+        password='Server123!')
 
 # Open a cursor to perform database operations
 cur = conn.cursor()

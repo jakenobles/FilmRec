@@ -4,13 +4,24 @@ from flask_cors import CORS
 from db import DB
 from login import Login
 from chat import Chat
+<<<<<<< HEAD
+from datetime import timedelta
+import os
+=======
+
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
+
+secret_key = os.getenv('JWT_KEY')
 
 
 #Starting the Flask app
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Change this to a random secret key
-app.config['JWT_COOKIE_SAMESITE'] = 'None'  # Set to 'Lax' or 'Strict' as per your requirement
+app.config['JWT_SECRET_KEY'] = f'{secret_key}'
+app.config['JWT_COOKIE_SAMESITE'] = 'None'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_COOKIE_SECURE'] = True
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+
 jwt = JWTManager(app)
 
 CORS(app, supports_credentials=True)
@@ -276,5 +287,4 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
