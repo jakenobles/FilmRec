@@ -10,11 +10,7 @@ class Chat:
   #Interfaces with ChatGPT, takes the query as an argument
   @staticmethod
   def chat_gpt(prompt):
-<<<<<<< HEAD
     client = OpenAI(api_key = os.getenv('OPENAI_API_KEY'),)
-=======
-    client = OpenAI()
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
     try:
         response = client.chat.completions.create(
             model="gpt-4-1106-preview",
@@ -56,11 +52,7 @@ class Chat:
     url = f"https://api.themoviedb.org/3/movie/{id}?language=en-US"
     headers = {
           "accept": "application/json",
-<<<<<<< HEAD
           "Authorization": f"Bearer {api_read_access_key}"
-=======
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0ZWU5YTVkYWNjODI2ZDMxMzA2ZTRiMmE5MDNkMTgzMyIsInN1YiI6IjY0MTIxM2FjZmU2YzE4MDA3YzM4ZTBjZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ItL7YRS1B7FQn7L2v_6z8m2T4j08YQ2GxT2LB_ACSSU"
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
     }
 
     try:
