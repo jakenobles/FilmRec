@@ -21,11 +21,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
 
   const postUserSelection = async (selectedGenres: string[]) => {
     console.log('test')
-<<<<<<< HEAD
     const apiUrl = 'https://filmrecapi.midnight-prophet.com/api/store/profile'; 
-=======
-    const apiUrl = 'http://fr-flask:5000/api/store/profile'; 
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
   
     try {
       const response = await fetch(apiUrl, {
@@ -58,11 +54,7 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
   useEffect(() => {
     const fetchUserPreferences = async () => {
       try {
-<<<<<<< HEAD
         const response = await fetch(`https://filmrecapi.midnight-prophet.com//api/fetch/profile`, {
-=======
-        const response = await fetch(`http://fr-flask:5000//api/fetch/profile`, {
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
           method: 'GET',
           credentials: 'include', // Necessary for cookies
           headers: {
@@ -89,10 +81,6 @@ const QuestionnaireComponent: React.FC<QuestionnaireComponentProps> = ({ onCompl
           setSelectedGenres(data.genres);
         }
       } catch (error: any) {
-<<<<<<< HEAD
-=======
-        setError(typeof error === 'string' ? error : error.message);
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
         console.error('Error fetching user preferences:', error);
       } finally {
         setIsLoading(false); // Finish loading

@@ -24,11 +24,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
   //Sends user's favorite movies to my database
   const watched_already = async () => {
     try {
-<<<<<<< HEAD
       const response = await fetch('https://filmrecapi.midnight-prophet.com/api/store/singlewatched', {
-=======
-      const response = await fetch('http://fr-flask:5000/api/store/singlewatched', {
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -54,11 +50,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
   //Sends user's favorite movies to my database
   const do_not_recommend = async () => {
     try {
-<<<<<<< HEAD
       const response = await fetch('https://filmrecapi.midnight-prophet.com/api/store/dnr', {
-=======
-      const response = await fetch('http://fr-flask:5000/api/store/dnr', {
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -83,11 +75,7 @@ const RecommendationComponent: React.FC<RecommendationComponentProps> = ({ recom
 
   const handleLogout = async () => {
     try {
-<<<<<<< HEAD
       const response = await fetch('https://filmrecapi.midnight-prophet.com/logout', {
-=======
-      const response = await fetch('http://fr-flask:5000/logout', {
->>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
         method: 'POST',
         credentials: 'include', // Ensure cookies are sent with the request if using session-based authentication
       });
