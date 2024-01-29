@@ -52,8 +52,11 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
 
       // Check if the response is successful
       if (!response.ok) {
+<<<<<<< HEAD
+=======
         const errorMessage = data.error || `Error: ${response.status} ${response.statusText}`;
         setError(errorMessage);
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
         throw new Error(`API call failed with status: ${response.status} ${response.statusText}`);
       }
   
@@ -61,7 +64,10 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
     } catch (error: any) {
       console.error("Error searching for movies:", error.message);
       setSearchResults([]);
+<<<<<<< HEAD
+=======
       setError(typeof error === 'string' ? error : error.message);
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
     }
   };
 
@@ -98,7 +104,11 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   const submitMovies = async () => {
     try {
       for (const movie of selectedMovies) {
+<<<<<<< HEAD
+        const response = await fetch('https://filmrecapi.midnight-prophet.com/api/store/watched', {
+=======
         const response = await fetch('http://fr-flask:5000/api/store/watched', {
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -108,7 +118,7 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`https error! status: ${response.status}`);
         }
       }
 
@@ -124,7 +134,11 @@ const MovieListComponent: React.FC<MovieListComponentProps> = ({ onSubmit, setSh
   useEffect(() => {
     const fetchUserWatched = async () => {
       try {
+<<<<<<< HEAD
+        const response = await fetch(`https://filmrecapi.midnight-prophet.com//api/fetch/watched`, {
+=======
         const response = await fetch(`http://fr-flask:5000//api/fetch/watched`, {
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
           method: 'GET',
           credentials: 'include', // Necessary for cookies
           headers: {

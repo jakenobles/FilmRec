@@ -18,8 +18,13 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onLoginSuccess, setGlob
 
   const handleAuth = async () => {
     const apiUrl = isLoginMode 
+<<<<<<< HEAD
+      ? 'https://filmrecapi.midnight-prophet.com/api/login' 
+      : 'https://filmrecapi.midnight-prophet.com/api/register';
+=======
       ? 'http://fr-flask:5000/api/login' 
       : 'http://fr-flask:5000/api/register';
+>>>>>>> 9fb520a5bb342aad6234aade176fa30877d76df3
     
     setError(''); // Reset error message
 
